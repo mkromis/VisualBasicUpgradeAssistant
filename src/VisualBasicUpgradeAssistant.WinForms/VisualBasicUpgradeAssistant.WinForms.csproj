@@ -10,4 +10,10 @@
     <ProjectReference Include="..\VisualBasicUpgradeAssistant.Core\VisualBasicUpgradeAssistant.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="vb2c.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
