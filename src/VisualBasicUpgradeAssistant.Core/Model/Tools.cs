@@ -3,7 +3,6 @@ using System.Collections;
 using System.Drawing;
 using System.IO;
 using System.Text; 
-using System.Windows.Forms;
 using System.Xml;
 
 namespace VB2C
@@ -29,39 +28,6 @@ namespace VB2C
       MessageBox.Show(Message ,"", MessageBoxButtons.OK ,MessageBoxIcon.Error);      
     }
 	}
-
-  sealed class App
-  {
-    public static XMLConfig Config;
-    public static frmConvert MainForm; 
-
-    // configuration constants
-    private const string CONFIG_FILE = "vb2c.xml";
-    public const string CONFIG_SETTING = "Setting";
-    public const string CONFIG_OUT_PATH = "OutPath";
-
-    /// <summary>
-    /// The main entry point for the application.
-    /// </summary>
-    [STAThread]
-    static void Main() 
-    {
-      // get current directory
-      string[] CommandLineArgs;
-      CommandLineArgs = Environment.GetCommandLineArgs();
-      // index 0 contain path and name of exe file
-      string sBinPath = Path.GetDirectoryName(CommandLineArgs[0].ToLower());
-
-      // create configuration object
-      Config = new XMLConfig(sBinPath + Path.DirectorySeparatorChar + CONFIG_FILE);
-
-      // create main screen 
-      MainForm = new frmConvert();
-      MainForm.Show(); 
-			Application.Run(MainForm);
-
-    }
-  }
 	
 	// parse VB6 properties and values to C#
   sealed class Tools

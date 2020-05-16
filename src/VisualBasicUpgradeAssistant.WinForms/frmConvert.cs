@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 using System.Data;
+using VisualBasicUpgradeAssistant.WinForms;
 
 namespace VB2C
 {
@@ -265,12 +266,12 @@ namespace VB2C
 
     private void frmConvert_Load(object sender, System.EventArgs e)
     {
-      txtOutPath.Text = App.Config.ReadString(App.CONFIG_SETTING, App.CONFIG_OUT_PATH, "");
+      txtOutPath.Text = Program.Config.ReadString(Program.CONFIG_SETTING, Program.CONFIG_OUT_PATH, "");
     }
 
     private void frmConvert_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
-      App.Config.WriteString(App.CONFIG_SETTING, App.CONFIG_OUT_PATH, txtOutPath.Text);
+      Program.Config.WriteString(Program.CONFIG_SETTING, Program.CONFIG_OUT_PATH, txtOutPath.Text);
     }
 
 //    private string FileSave()
