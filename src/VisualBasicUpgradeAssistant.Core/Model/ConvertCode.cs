@@ -5,7 +5,7 @@ using System.IO;
 using System.Resources;
 using System.Text;
 
-namespace VB2C
+namespace VisualBasicUpgradeAssistant.Core.Model
 {
     public enum VB_FILE_TYPE
     {
@@ -89,13 +89,9 @@ namespace VB2C
                     //            Debug.WriteLine (Line + " " + Version);
 
                     if (line.IndexOf(CLASS_FIRST_LINE, 0) > -1)
-                    {
                         _fileType = VB_FILE_TYPE.VB_FILE_CLASS;
-                    }
                     else
-                    {
                         _fileType = VB_FILE_TYPE.VB_FILE_FORM;
-                    }
                     break;
                 default:
                     _fileType = VB_FILE_TYPE.VB_FILE_UNKNOWN;
@@ -147,10 +143,8 @@ namespace VB2C
             Writer.Close();
             // generate resx file if source form contain any images
 
-            if ((_targetModule.ImagesUsed))
-            {
+            if (_targetModule.ImagesUsed)
                 WriteResX(_targetModule.ImageList, outPath, _targetModule.Name);
-            }
 
             return result;
         }
@@ -235,19 +229,13 @@ namespace VB2C
                     case "End":
                         // double end - we leaving some container
                         if (bEnd)
-                        {
                             // remove last item from stock
                             _ownerStock.Remove((String)_ownerStock[_ownerStock.Count - 1]);
-                        }
                         else
-                        {
                             // level 1 is form and all higher levels are controls
                             if (iLevel > 1)
-                            {
-                                // add control to colection
-                                _sourceModule.ControlAdd(oControl);
-                            }
-                        }
+                            // add control to colection
+                            _sourceModule.ControlAdd(oControl);
                         // form or control end detected
                         bEnd = true;
                         // back to previous level
@@ -274,15 +262,11 @@ namespace VB2C
                         bNestedProperty = false;
                         // add property to control or form
                         if (iLevel == 1)
-                        {
                             // add property to form
                             _sourceModule.FormPropertyAdd(oNestedProperty);
-                        }
                         else
-                        {
                             // to controls
                             oControl.PropertyAdd(oNestedProperty);
-                        }
                         break;
 
                     default:
@@ -300,37 +284,25 @@ namespace VB2C
                                 oProperty.Comment = sLine.Substring(iComment + 1, sLine.Length - iComment - 1).Trim();
                             }
                             else
-                            {
                                 oProperty.Value = sLine.Substring(iTemp + 1, sLine.Length - iTemp - 1).Trim();
-                            }
 
                             if (bNestedProperty)
-                            {
                                 oNestedProperty.PropertyList.Add(oProperty);
-                            }
                             else
-                            {
                                 // depend by level insert property to form or control
                                 if (iLevel > 1)
-                                {
-                                    // add property to control
-                                    oControl.PropertyAdd(oProperty);
-                                }
-                                else
-                                {
-                                    // add property to form
-                                    _sourceModule.FormPropertyAdd(oProperty);
-                                }
-                            }
+                                // add property to control
+                                oControl.PropertyAdd(oProperty);
+                            else
+                                // add property to form
+                                _sourceModule.FormPropertyAdd(oProperty);
                         }
                         break;
                 }
 
-                if ((iLevel == 0) && bProcess)
-                {
+                if (iLevel == 0 && bProcess)
                     // visual part of form is finish
                     bFinish = true;
-                }
 
             }
             return true;
@@ -437,13 +409,9 @@ namespace VB2C
                 position = 0;
 
                 if (line != null && line != String.Empty)
-                {
                     // check if next line is same command, join it together ?
                     while (line.Substring(line.Length - 1, 1) == "_")
-                    {
                         line = line + reader.ReadLine();
-                    }
-                }
                 // : is command delimiter
 
 
@@ -565,14 +533,10 @@ namespace VB2C
                             oEnum.ItemList.Add(oEnumItem);
                         }
                         if (bProperty)
-                        {
                             // add line of property
                             oProperty.LineList.Add(line);
-                        }
                         if (bProcedure)
-                        {
                             oProcedure.LineList.Add(line);
-                        }
                         break;
 
 
@@ -616,12 +580,8 @@ namespace VB2C
                     bEnd = false;
                 }
                 else
-                {
                     if (bVariable)
-                    {
-                        _sourceModule.VariableAdd(oVariable);
-                    }
-                }
+                    _sourceModule.VariableAdd(oVariable);
 
                 bVariable = false;
             }
@@ -750,7 +710,7 @@ namespace VB2C
             Start = iPosition;
             iPosition = line.IndexOf(")", Start);
 
-            if ((iPosition - Start) > 0)
+            if (iPosition - Start > 0)
             {
                 TempString = line.Substring(Start, iPosition - Start);
                 ArrayList ParameterList = new ArrayList();
@@ -829,10 +789,8 @@ namespace VB2C
                 Position = line.IndexOf(",", Start);
 
                 if (Position == -1)
-                {
                     // end
                     bFinish = true;
-                }
 
             }
         }
@@ -902,7 +860,7 @@ namespace VB2C
             start = position;
             position = line.IndexOf(")", start);
 
-            if ((position - start) > 0)
+            if (position - start > 0)
             {
                 tempString = line.Substring(start, position - start);
                 ArrayList ParameterList = new ArrayList();
@@ -989,9 +947,7 @@ namespace VB2C
                 foreach (Control oControl in _targetModule.ControlList)
                 {
                     if (!oControl.Valid)
-                    {
                         oResult.Append("//");
-                    }
                     oResult.Append(Indent2 + " private System.Windows.Forms." + oControl.Type + " " + oControl.Name + ";\r\n");
                 }
 
@@ -1033,18 +989,14 @@ namespace VB2C
 
                 // if form contain images
                 if (_targetModule.ImagesUsed)
-                {
                     // System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(Form1));
                     oResult.Append(Indent6 + "System.Resources.ResourceManager resources = " +
                       "new System.Resources.ResourceManager(typeof(" + _targetModule.Name + "));\r\n");
-                }
 
                 foreach (Control oControl in _targetModule.ControlList)
                 {
                     if (!oControl.Valid)
-                    {
                         oResult.Append("//");
-                    }
                     oResult.Append(Indent6 + "this." + oControl.Name
                       + " = new System.Windows.Forms." + oControl.Type
                       + "();\r\n");
@@ -1056,18 +1008,14 @@ namespace VB2C
                 // this.Frame1.ResumeLayout(false);
                 // resume layout for each container
                 foreach (Control oControl in _targetModule.ControlList)
-                {
                     // check if control is container
                     // !! for menu controls
-                    if ((oControl.Container) && !(oControl.Type == "MenuItem") && !(oControl.Type == "MainMenu"))
+                    if (oControl.Container && !(oControl.Type == "MenuItem") && !(oControl.Type == "MainMenu"))
                     {
                         if (!oControl.Valid)
-                        {
                             oResult.Append("//");
-                        }
                         oResult.Append(Indent6 + "this." + oControl.Name + ".SuspendLayout();\r\n");
                     }
-                }
 
                 // each controls and his property		  
                 foreach (Control oControl in _targetModule.ControlList)
@@ -1078,48 +1026,35 @@ namespace VB2C
 
                     // unsupported control
                     if (!oControl.Valid)
-                    { oResult.Append("/*"); }
-
+                        oResult.Append("/*");
                     // ImageList, Timer, Menu has't name property
-                    if ((oControl.Type != "ImageList") && (oControl.Type != "Timer")
-                      && (oControl.Type != "MenuItem") && (oControl.Type != "MainMenu"))
-                    {
+                    if (oControl.Type != "ImageList" && oControl.Type != "Timer"
+                      && oControl.Type != "MenuItem" && oControl.Type != "MainMenu")
                         // control name
                         oResult.Append(Indent6 + "this." + oControl.Name + ".Name = "
                           + (Char)34 + oControl.Name + (Char)34 + ";\r\n");
-                    }
 
                     // write properties
                     foreach (ControlProperty oProperty in oControl.PropertyList)
-                    {
                         GetPropertyRow(oResult, oControl.Type, oControl.Name, oProperty, outPath);
-                    }
 
                     // if control is container for other controls
                     temp = String.Empty;
                     foreach (Control oControl1 in _targetModule.ControlList)
-                    {
                         // all controls ownered by current control
-                        if ((oControl1.Owner == oControl.Name) && (!oControl1.InvisibleAtRuntime))
-                        {
+                        if (oControl1.Owner == oControl.Name && !oControl1.InvisibleAtRuntime)
                             temp = temp + Indent6 + Indent6 + "this." + oControl1.Name + ",\r\n";
-                        }
-                    }
                     if (temp != String.Empty)
                     {
                         // exception for menu controls
                         if (oControl.Type == "MainMenu" || oControl.Type == "MenuItem")
-                        {
                             // this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] 
                             oResult.Append(Indent6 + "this." + oControl.Name
                               + ".MenuItems.AddRange(new System.Windows.Forms.MenuItem[]\r\n");
-                        }
                         else
-                        {
                             // this. + oControl.Name + .Controls.AddRange(new System.Windows.Forms.Control[]
                             oResult.Append(Indent6 + "this." + oControl.Name
                               + ".Controls.AddRange(new System.Windows.Forms.Control[]\r\n");
-                        }
 
                         oResult.Append(Indent6 + "{\r\n");
                         oResult.Append(temp);
@@ -1130,7 +1065,7 @@ namespace VB2C
                     }
                     // unsupported control
                     if (!oControl.Valid)
-                    { oResult.Append("*/"); }
+                        oResult.Append("*/");
                 }
 
                 oResult.Append(Indent6 + "//\r\n");
@@ -1144,14 +1079,10 @@ namespace VB2C
                 foreach (Control oControl in _targetModule.ControlList)
                 {
                     if (!oControl.Valid)
-                    {
                         oResult.Append("//");
-                    }
                     // all controls ownered by main form
-                    if ((oControl.Owner == _sourceModule.Name) && (!oControl.InvisibleAtRuntime))
-                    {
+                    if (oControl.Owner == _sourceModule.Name && !oControl.InvisibleAtRuntime)
                         oResult.Append(Indent6 + "      this." + oControl.Name + ",\r\n");
-                    }
                 }
 
                 // remove last comma, keep CRLF
@@ -1164,22 +1095,14 @@ namespace VB2C
                 // exception for menu
                 // this.Menu = this.mainMenu1;
                 if (_targetModule.MenuUsed)
-                {
                     foreach (Control oControl in _targetModule.ControlList)
-                    {
                         if (oControl.Type == "MainMenu")
-                        {
                             oResult.Append(Indent6 + "      this.Menu = " + oControl.Name + ";\r\n");
-                        }
-                    }
-                }
                 // form properties
                 foreach (ControlProperty oProperty in _targetModule.FormPropertyList)
                 {
                     if (!oProperty.Valid)
-                    {
                         oResult.Append("//");
-                    }
                     GetPropertyRow(oResult, _targetModule.Type, "", oProperty, outPath);
                 }
 
@@ -1189,17 +1112,13 @@ namespace VB2C
                 // this.Frame1.ResumeLayout(false);
                 // resume layout for each container
                 foreach (Control oControl in _targetModule.ControlList)
-                {
                     // check if control is container
-                    if ((oControl.Container) && !(oControl.Type == "MenuItem") && !(oControl.Type == "MainMenu"))
+                    if (oControl.Container && !(oControl.Type == "MenuItem") && !(oControl.Type == "MainMenu"))
                     {
                         if (!oControl.Valid)
-                        {
                             oResult.Append("//");
-                        }
                         oResult.Append(Indent6 + "this." + oControl.Name + ".ResumeLayout(false);\r\n");
                     }
-                }
                 // form
                 oResult.Append(Indent6 + "this.ResumeLayout(false);\r\n");
 
@@ -1227,9 +1146,7 @@ namespace VB2C
                         oResult.Append(Indent6 + oEnumItem.Name);
 
                         if (oEnumItem.Value != String.Empty)
-                        {
                             oResult.Append(" = " + oEnumItem.Value);
-                        }
                         // enum items delimiter
                         oResult.Append(",\r\n");
 
@@ -1250,18 +1167,15 @@ namespace VB2C
                 oResult.Append("\r\n");
 
                 foreach (Variable oVariable in _targetModule.VariableList)
-                {
                     // string Result = null;
                     oResult.Append(Indent4 + oVariable.Scope + " " + oVariable.Type + " " + oVariable.Name + ";\r\n");
-                }
             }
 
             // ********************************************************
             // properties has only forms and classes
             // ********************************************************
 
-            if ((_targetModule.Type == "form") || (_targetModule.Type == "class"))
-            {
+            if (_targetModule.Type == "form" || _targetModule.Type == "class")
                 // properties
                 if (_targetModule.PropertyList.Count > 0)
                 {
@@ -1287,18 +1201,13 @@ namespace VB2C
                         {
                             temp = Line.Trim();
                             if (temp.Length > 0)
-                            {
                                 oResult.Append(Indent6 + temp + ";\r\n");
-                            }
                             else
-                            {
                                 oResult.Append("\r\n");
-                            }
                         }
                         oResult.Append(Indent4 + "}\r\n");
                     }
                 }
-            }
 
             // ********************************************************
             // procedures
@@ -1330,9 +1239,7 @@ namespace VB2C
                     {
                     }
                     else
-                    {
                         oResult.Append("()\r\n");
-                    }
 
                     // start body
                     oResult.Append(Indent4 + "{\r\n");
@@ -1341,13 +1248,9 @@ namespace VB2C
                     {
                         temp = Line.Trim();
                         if (temp.Length > 0)
-                        {
                             oResult.Append(Indent6 + temp + ";\r\n");
-                        }
                         else
-                        {
                             oResult.Append("\r\n");
-                        }
                     }
                     // end procedure
                     oResult.Append(Indent4 + "}\r\n");
@@ -1375,7 +1278,6 @@ namespace VB2C
                 ResXResourceWriter rsxw = new ResXResourceWriter(sResxName);
 
                 foreach (String ResourceName in imageList)
-                {
                     try
                     {
                         Image img = Image.FromFile(outPath + ResourceName);
@@ -1385,14 +1287,11 @@ namespace VB2C
                     catch
                     {
                     }
-                }
                 // rsxw.Generate();
                 rsxw.Close();
 
                 foreach (String ResourceName in imageList)
-                {
                     File.Delete(outPath + ResourceName);
-                }
             }
         }
 
@@ -1410,28 +1309,22 @@ namespace VB2C
             // CONTROL.FRX:0000
 
             if (sourceModule.Version == "5.00")
-            {
                 FrxFile = value.Substring(1, Position - 2);
-            }
             else
-            {
                 FrxFile = value.Substring(0, Position);
-            }
 
             Temp = value.Substring(Position + 1, value.Length - Position - 1);
-            Offset = System.Convert.ToInt32("0x" + Temp, 16);
+            Offset = Convert.ToInt32("0x" + Temp, 16);
             // exist file ?
 
             // get image
 
             _tools.GetFRXImage(Path.GetDirectoryName(sourceModule.FileName) + @"\" + FrxFile, Offset, out Byte[] imageString);
 
-            if ((imageString.GetLength(0) - 8) > 0)
+            if (imageString.GetLength(0) - 8 > 0)
             {
                 if (File.Exists(outPath + resourceName))
-                {
                     File.Delete(outPath + resourceName);
-                }
                 FileStream Stream = Stream = new FileStream(outPath + resourceName, FileMode.CreateNew, FileAccess.Write);
                 BinaryWriter Writer = new BinaryWriter(Stream);
                 Writer.Write(imageString, 8, imageString.GetLength(0) - 8);
@@ -1443,9 +1336,7 @@ namespace VB2C
                 return true;
             }
             else
-            {
                 return false;
-            }
             // save it to resx
             //      Debug.WriteLine(ModuleName + ", " + ResourceName + ", " + Temp + ", " + oImage.Width.ToString() );  
             //      
@@ -1495,9 +1386,7 @@ namespace VB2C
                     position = End;
                 }
                 else
-                {
                     Result = line.Substring(position);
-                }
             }
             return Result;
         }
@@ -1528,7 +1417,6 @@ namespace VB2C
                         break;
                 }
                 if (WriteImage(_sourceModule, ResourceName, property.Value, outPath))
-                {
                     switch (property.Name)
                     {
                         case "BackgroundImage":
@@ -1547,25 +1435,20 @@ namespace VB2C
                               + (Char)34 + name + ".Image" + (Char)34 + ")));\r\n");
                             break;
                     }
-                }
             }
             else
             {
                 // unsupported property
                 if (!property.Valid)
-                { result.Append("//"); }
+                    result.Append("//");
                 if (type == "form")
-                {
                     // form properties
                     result.Append(Indent6 + "this."
                       + property.Name + " = " + property.Value + ";\r\n");
-                }
                 else
-                {
                     // control properties
                     result.Append(Indent6 + "this." + name + "."
                       + property.Name + " = " + property.Value + ";\r\n");
-                }
             }
         }
     }

@@ -1,6 +1,6 @@
 using System;
 
-namespace VB2C
+namespace VisualBasicUpgradeAssistant.Core.Model
 {
     /// <summary>
     /// TODO - Add class summary

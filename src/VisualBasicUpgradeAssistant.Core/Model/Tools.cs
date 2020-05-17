@@ -6,7 +6,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 
-namespace VB2C
+namespace VisualBasicUpgradeAssistant.Core.Model
 {
     /// <summary>
     /// Parse VB6 properties and values to C#
@@ -34,11 +34,9 @@ namespace VB2C
             node = Doc.DocumentElement.SelectSingleNode("/configuration/ControlList");
             // exit with an empty collection if nothing here
             if (node == null)
-            { return; }
-            // exit with an empty colection if the node has no children
+                return;             // exit with an empty colection if the node has no children
             if (node.HasChildNodes == false)
-            { return; }
-            // get the nodelist of all children
+                return;             // get the nodelist of all children
             XmlNodeList nodeList = node.ChildNodes;
 
             foreach (XmlElement element in nodeList)
@@ -51,7 +49,6 @@ namespace VB2C
                     InvisibleAtRuntime = false
                 };
                 foreach (XmlElement childElement in element)
-                {
                     switch (childElement.Name)
                     {
                         case "VB6":
@@ -68,7 +65,6 @@ namespace VB2C
                             oItem.InvisibleAtRuntime = Boolean.Parse(childElement.InnerText);
                             break;
                     }
-                }
                 _controlList.Add(oItem.VB6Name, oItem);
             }
 
@@ -115,13 +111,9 @@ namespace VB2C
                 };
                 targetModule.ControlList.Insert(0, oControl);
                 foreach (Control oMenuControl in targetModule.ControlList)
-                {
-                    if ((oMenuControl.Type == "MenuItem") && (oMenuControl.Owner == targetModule.Name))
-                    {
+                    if (oMenuControl.Type == "MenuItem" && oMenuControl.Owner == targetModule.Name)
                         // rewrite previous owner
                         oMenuControl.Owner = oControl.Name;
-                    }
-                }
             }
 
             ArrayList TempControlList = new ArrayList();
@@ -130,7 +122,7 @@ namespace VB2C
             // check for TabDlg.SSTab
             foreach (Control oTargetControl in targetModule.ControlList)
             {
-                if ((oTargetControl.Type == "TabControl") && (oTargetControl.Valid))
+                if (oTargetControl.Type == "TabControl" && oTargetControl.Valid)
                 {
                     // for each source table is necessary
                     //          this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -199,7 +191,6 @@ namespace VB2C
                         // Control = change owner of control to current tab
                         //      this.SSTab1.(Tab(0).Control(0) = "ImageControl";
                         if (oTargetProperty.Name.IndexOf(".Control(", 0) > -1)
-                        {
                             if (oTargetProperty.Name.IndexOf("Enable", 0) == -1)
                             {
                                 String TabName = oTargetProperty.Value.Substring(1, oTargetProperty.Value.Length - 2);
@@ -207,14 +198,9 @@ namespace VB2C
                                 // search for "oTargetProperty.Value" control
                                 // and replace owner of this control to current tab
                                 foreach (Control oNewOwner in targetModule.ControlList)
-                                {
-                                    if ((oNewOwner.Name == TabName) && (!oNewOwner.InvisibleAtRuntime))
-                                    {
+                                    if (oNewOwner.Name == TabName && !oNewOwner.InvisibleAtRuntime)
                                         oNewOwner.Owner = oTabPage.Name;
-                                    }
-                                }
                             }
-                        }
                     }
                 }
                 TabControlIndex++;
@@ -259,9 +245,7 @@ namespace VB2C
                 return tabName.Substring(0, Start) + tabName.Substring(Start + 1, End - Start - 1);
             }
             else
-            {
                 return tabName;
-            }
 
 
         }
@@ -294,16 +278,12 @@ namespace VB2C
                     {
                         Type = oItem.CsharpName;
                         if (Type == "MenuItem")
-                        {
                             oModule.MenuUsed = true;
-                        }
                     }
                     oTargetControl.InvisibleAtRuntime = oItem.InvisibleAtRuntime;
                 }
                 else
-                {
                     Type = oSourceControl.Type;
-                }
 
                 oTargetControl.Type = Type;
                 ParseControlProperties(oModule, oTargetControl, oSourceControl.PropertyList, oTargetControl.PropertyList);
@@ -324,9 +304,7 @@ namespace VB2C
                 if (ParseProperties(oModule.Type, SourceProperty, TargetProperty, sourcePropertyList))
                 {
                     if (TargetProperty.Name == "BackgroundImage" || TargetProperty.Name == "Icon")
-                    {
                         oModule.ImagesUsed = true;
-                    }
                     targetPropertyList.Add(TargetProperty);
                 }
             }
@@ -336,9 +314,7 @@ namespace VB2C
         public Boolean ParseEnums(Module sourceModule, Module targetModule)
         {
             foreach (Enum SourceEnum in sourceModule.EnumList)
-            {
                 targetModule.EnumList.Add(SourceEnum);
-            }
             return true;
         }
 
@@ -351,9 +327,7 @@ namespace VB2C
             {
                 TargetVariable = new Variable();
                 if (ParseVariable(SourceVariable, TargetVariable))
-                {
                     targetVariableList.Add(TargetVariable);
-                }
             }
             return true;
         }
@@ -435,12 +409,8 @@ namespace VB2C
                 TargetProperty.Type = VariableTypeConvert(SourceProperty.Type);
                 // lines
                 foreach (String Line in SourceProperty.LineList)
-                {
                     if (Line.Trim() != String.Empty)
-                    {
                         TargetProperty.LineList.Add(Line);
-                    }
-                }
 
 
 
@@ -587,19 +557,13 @@ namespace VB2C
                         }
 
                         if (TempLine == String.Empty)
-                        {
                             TargetProcedure.LineList.Add(Temp);
-                        }
                         else
-                        {
                             TargetProcedure.LineList.Add(TempLine);
-                        }
 
                     }
                     else
-                    {
                         TargetProcedure.LineList.Add(String.Empty);
-                    }
                 }
 
                 targetModule.ProcedureList.Add(TargetProcedure);
@@ -616,25 +580,19 @@ namespace VB2C
 
             // each property  
             foreach (ControlProperty SourceProperty in sourcePropertyList)
-            {
                 if (SourceProperty.Name == "Index")
-                {
                     // Index           =   3
                     control.Name = control.Name + SourceProperty.Value;
-                }
                 else
                 {
                     TargetProperty = new ControlProperty();
                     if (ParseProperties(control.Type, SourceProperty, TargetProperty, sourcePropertyList))
                     {
                         if (TargetProperty.Name == "Image")
-                        {
                             module.ImagesUsed = true;
-                        }
                         targetPropertyList.Add(TargetProperty);
                     }
                 }
-            }
             return true;
         }
 
@@ -697,9 +655,7 @@ namespace VB2C
                         targetProperty.Value = GetColor(sourceProperty.Value);
                     }
                     else
-                    {
                         ValidProperty = false;
-                    }
                     break;
 
                 case "BorderStyle":
@@ -773,15 +729,13 @@ namespace VB2C
 
                 // this.cmdExit.Location = new System.Drawing.Point(616, 520);
                 case "Left":
-                    if ((type != "ImageList") && (type != "Timer"))
+                    if (type != "ImageList" && type != "Timer")
                     {
                         targetProperty.Name = "Location";
                         targetProperty.Value = "new System.Drawing.Point(" + GetLocation(sourcePropertyList) + ")";
                     }
                     else
-                    {
                         ValidProperty = false;
-                    }
                     break;
                 case "Top":
                 case "Width":
@@ -805,9 +759,7 @@ namespace VB2C
                         targetProperty.Value = GetBool(sourceProperty.Value);
                     }
                     else
-                    {
                         ValidProperty = false;
-                    }
                     break;
 
                 case "Font":
@@ -900,9 +852,7 @@ namespace VB2C
                         targetProperty.Value = sourceProperty.Value;
                     }
                     else
-                    {
                         ValidProperty = false;
-                    }
                     break;
 
                 // -1 converted to true
@@ -915,9 +865,7 @@ namespace VB2C
                         targetProperty.Value = GetBool(sourceProperty.Value);
                     }
                     else
-                    {
                         ValidProperty = false;
-                    }
                     break;
 
                 case "Icon":
@@ -962,13 +910,9 @@ namespace VB2C
                     targetProperty.Name = sourceProperty.Name;
 
                     if (type == "RichTextBox")
-                    {
                         targetProperty.Value = "System.Windows.Forms.RichTextBoxScrollBars.";
-                    }
                     else
-                    {
                         targetProperty.Value = "System.Windows.Forms.ScrollBars.";
-                    }
                     switch (sourceProperty.Value)
                     {
                         default:
@@ -1178,7 +1122,6 @@ namespace VB2C
             //      EndProperty
 
             foreach (ControlProperty oProperty in sourceProperty.PropertyList)
-            {
                 switch (oProperty.Name)
                 {
                     case "Name":
@@ -1194,22 +1137,21 @@ namespace VB2C
                         //          bFontBold = False
                         //        End If
                         // FW_BOLD = 700
-                        FontBold = (Int32.Parse(oProperty.Value) >= 700);
+                        FontBold = Int32.Parse(oProperty.Value) >= 700;
                         break;
                     case "Charset":
                         FontCharSet = Int32.Parse(oProperty.Value);
                         break;
                     case "Underline":
-                        FontUnderline = (Int32.Parse(oProperty.Value) != 0);
+                        FontUnderline = Int32.Parse(oProperty.Value) != 0;
                         break;
                     case "Italic":
-                        FontItalic = (Int32.Parse(oProperty.Value) != 0);
+                        FontItalic = Int32.Parse(oProperty.Value) != 0;
                         break;
                     case "Strikethrough":
-                        FontStrikethrough = (Int32.Parse(oProperty.Value) != 0);
+                        FontStrikethrough = Int32.Parse(oProperty.Value) != 0;
                         break;
                 }
-            }
 
             //      this.cmdExit.Font = new System.Drawing.Font("Tahoma", 12F, 
             //        (System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline
@@ -1226,35 +1168,29 @@ namespace VB2C
 
             Temp = String.Empty;
             if (FontBold)
-            {
                 Temp = "System.Drawing.FontStyle.Bold";
-            }
             if (FontItalic)
             {
                 if (Temp != String.Empty)
-                { Temp = Temp + " | "; }
+                    Temp = Temp + " | ";
                 Temp = Temp + "System.Drawing.FontStyle.Italic";
             }
             if (FontUnderline)
             {
                 if (Temp != String.Empty)
-                { Temp = Temp + " | "; }
+                    Temp = Temp + " | ";
                 Temp = Temp + "System.Drawing.FontStyle.Underline";
             }
             if (FontStrikethrough)
             {
                 if (Temp != String.Empty)
-                { Temp = Temp + " | "; }
+                    Temp = Temp + " | ";
                 Temp = Temp + "System.Drawing.FontStyle.Strikeout";
             }
             if (Temp == String.Empty)
-            {
                 targetProperty.Value = targetProperty.Value + " System.Drawing.FontStyle.Regular,";
-            }
             else
-            {
                 targetProperty.Value = targetProperty.Value + " ( " + Temp + " ),";
-            }
             targetProperty.Value = targetProperty.Value + " System.Drawing.GraphicsUnit.Point, ";
             targetProperty.Value = targetProperty.Value + "((System.Byte)(" + FontCharSet.ToString() + ")));";
         }
@@ -1265,54 +1201,38 @@ namespace VB2C
 
             Position = value.IndexOf(",", 0);
             if (Position > -1)
-            {
                 return Int32.Parse(value.Substring(0, Position));
-            }
 
             Position = value.IndexOf(".", 0);
             if (Position > 0)
-            {
                 return Int32.Parse(value.Substring(0, Position));
-            }
             return Int32.Parse(value);
         }
 
         private String GetColor(String value)
         {
-            System.Drawing.Color color = System.Drawing.SystemColors.Control;
+            Color color = SystemColors.Control;
             String ColorValue;
 
             ColorValue = "0x" + value.Substring(2, value.Length - 3);
-            color = System.Drawing.ColorTranslator.FromWin32(System.Convert.ToInt32(ColorValue, 16));
+            color = ColorTranslator.FromWin32(Convert.ToInt32(ColorValue, 16));
 
             if (!color.IsSystemColor)
-            {
                 if (color.IsNamedColor)
-                {
                     // System.Drawing.Color.Yellow;
                     return "System.Drawing.Color." + color.Name;
-                }
                 else
-                {
                     return "System.Drawing.Color.FromArgb(" + color.ToArgb() + ")";
-                }
-            }
             else
-            {
                 return "System.Drawing.SystemColors." + color.Name;
-            }
         }
 
         private String GetBool(String value)
         {
             if (Int32.Parse(value) == 0)
-            {
                 return "false";
-            }
             else
-            {
                 return "true";
-            }
         }
 
         private String GetSize(String height, String width, ArrayList propertyList)
@@ -1324,13 +1244,9 @@ namespace VB2C
             foreach (ControlProperty oProperty in propertyList)
             {
                 if (oProperty.Name == height)
-                {
                     HeightValue = Int32.Parse(oProperty.Value) / 15;
-                }
                 if (oProperty.Name == width)
-                {
                     WidthValue = Int32.Parse(oProperty.Value) / 15;
-                }
             }
             // 0, 120
             return WidthValue.ToString() + ", " + HeightValue.ToString();
@@ -1348,15 +1264,11 @@ namespace VB2C
                 {
                     Left = Int32.Parse(oProperty.Value);
                     if (Left < 0)
-                    {
                         Left = 75000 + Left;
-                    }
                     Left = Left / 15;
                 }
                 if (oProperty.Name == "Top")
-                {
                     Top = Int32.Parse(oProperty.Value) / 15;
-                }
             }
             // 616, 520
             return Left.ToString() + ", " + Top.ToString();
@@ -1378,9 +1290,9 @@ namespace VB2C
             // Convert This Header Into The Number Of Bytes
             // To Read For This Image
             bytesToRead = header[0];
-            bytesToRead += (header[1] * 0x100);
-            bytesToRead += (header[2] * 0x10000);
-            bytesToRead += (header[3] * 0x1000000);
+            bytesToRead += header[1] * 0x100;
+            bytesToRead += header[2] * 0x10000;
+            bytesToRead += header[3] * 0x1000000;
             // Get image information
             imageString = new Byte[bytesToRead];
             imageString = Reader.ReadBytes(bytesToRead);

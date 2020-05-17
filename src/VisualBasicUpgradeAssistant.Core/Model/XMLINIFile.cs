@@ -1,7 +1,7 @@
 using System;
 using System.Xml;
 
-namespace VB2C
+namespace VisualBasicUpgradeAssistant.Core.Model
 {
     public class XMLConfig
     {
@@ -24,7 +24,7 @@ namespace VB2C
             }
             catch
             {
-                Doc.LoadXml(("<configuration>" + "</configuration>"));
+                Doc.LoadXml("<configuration>" + "</configuration>");
                 Doc.Save(msFileName);
             }
         }
@@ -39,21 +39,17 @@ namespace VB2C
 
             // return immediately if the file didn't exist
             if (doesExist == false)
-            { return bDefaultValue; }
+                return bDefaultValue;
             if (aSection == "")
-            { return bDefaultValue; }
+                return bDefaultValue;
             if (aKey == "")
-            { return bDefaultValue; }
+                return bDefaultValue;
             sResult = getKeyValue(aSection, aKey, bDefaultValue.ToString());
 
             if (sResult.ToLower() == "true")
-            {
                 return true;
-            }
             else
-            {
                 return false;
-            }
         }
 
         public int ReadInt(string aSection, string aKey, int iDefaultValue)
@@ -62,11 +58,11 @@ namespace VB2C
 
             // return immediately if the file didn't exist
             if (doesExist == false)
-            { return iDefaultValue; }
+                return iDefaultValue;
             if (aSection == "")
-            { return iDefaultValue; }
+                return iDefaultValue;
             if (aKey == "")
-            { return iDefaultValue; }
+                return iDefaultValue;
             sResult = getKeyValue(aSection, aKey, iDefaultValue.ToString());
             return int.Parse(sResult);
         }
@@ -75,11 +71,11 @@ namespace VB2C
         {
             // return immediately if the file didn't exist
             if (doesExist == false)
-            { return aDefaultValue; }
+                return aDefaultValue;
             if (aSection == "")
-            { return aDefaultValue; }
+                return aDefaultValue;
             if (aKey == "")
-            { return aDefaultValue; }
+                return aDefaultValue;
             return getKeyValue(aSection, aKey, aDefaultValue);
         }
 
@@ -122,14 +118,13 @@ namespace VB2C
             if (aKey == "")
             // find the section, remove all its keys and remove the section
             {
-                node1 = (Doc.DocumentElement).SelectSingleNode("/configuration/" + aSection);
+                node1 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection);
                 // if no such section, return true
                 if (node1 == null)
-                { return true; }
-                // remove all its children
+                    return true;                 // remove all its children
                 node1.RemoveAll();
                 // select its parent ("configuration")
-                node2 = (Doc.DocumentElement).SelectSingleNode("configuration");
+                node2 = Doc.DocumentElement.SelectSingleNode("configuration");
                 // remove the section
                 node2.RemoveChild(node1);
             }
@@ -138,16 +133,14 @@ namespace VB2C
                 if (aValue == "")
                 {
                     // find the section of this key
-                    node1 = (Doc.DocumentElement).SelectSingleNode("/configuration/" + aSection);
+                    node1 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection);
                     // return if the section doesn't exist
                     if (node1 == null)
-                    { return true; }
-                    // find the key
-                    node2 = (Doc.DocumentElement).SelectSingleNode("/configuration/" + aSection + "/" + aKey);
+                        return true;                     // find the key
+                    node2 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection + "/" + aKey);
                     // return true if the key doesn't exist
                     if (node2 == null)
-                    { return true; }
-                    // remove the key
+                        return true;                     // remove the key
                     if (node1.RemoveChild(node2) == null)
                         return false;
                 }
@@ -155,11 +148,11 @@ namespace VB2C
                 {
                     // Both the Key and the Value are filled 
                     // Find the key
-                    node1 = (Doc.DocumentElement).SelectSingleNode("/configuration/" + aSection + "/" + aKey);
+                    node1 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection + "/" + aKey);
                     if (node1 == null)
                     {
                         // The key doesn't exist: find the section
-                        node2 = (Doc.DocumentElement).SelectSingleNode("/configuration/" + aSection);
+                        node2 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection);
                         if (node2 == null)
                         {
                             // Create the section first
@@ -168,13 +161,12 @@ namespace VB2C
                             node2 = Doc.DocumentElement.AppendChild(e);
                             // return false if failure
                             if (node2 == null)
-                            { return false; }
-                            // now create key and value
+                                return false;                             // now create key and value
                             e = Doc.CreateElement(aKey);
                             e.InnerText = aValue;
                             // return false if failure
                             if (node2.AppendChild(e) == null)
-                            { return false; }
+                                return false;
                         }
                         else
                         {
@@ -185,10 +177,8 @@ namespace VB2C
                         }
                     }
                     else
-                    {
                         // Key exists: set its Value
                         node1.InnerText = aValue;
-                    }
                 }
                 // Save the document
                 Doc.Save(FileName);
@@ -199,9 +189,9 @@ namespace VB2C
         private string getKeyValue(string aSection, string aKey, string aDefaultValue)
         {
             XmlNode node;
-            node = (Doc.DocumentElement).SelectSingleNode("/configuration/" + aSection + "/" + aKey);
+            node = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection + "/" + aKey);
             if (node == null)
-            { return aDefaultValue; }
+                return aDefaultValue;
             return node.InnerText;
         }
 
@@ -219,19 +209,15 @@ namespace VB2C
 
             // exit with an empty collection if nothing here
             if (node == null)
-            { return sReturn; }
-            // exit with an empty colection if the node has no children
+                return sReturn;             // exit with an empty colection if the node has no children
             if (node.HasChildNodes == false)
-            { return sReturn; }
-            // get the nodelist of all children
+                return sReturn;             // get the nodelist of all children
             XmlNodeList nodeList = node.ChildNodes;
             int i;
             // transform the Nodelist into an ordinary collection
             sReturn = new string[nodeList.Count];
             for (i = 0; i < nodeList.Count; i++)
-            {
-                sReturn[i] = (nodeList.Item(i).Name);
-            }
+                sReturn[i] = nodeList.Item(i).Name;
             return sReturn;
         }
     }
