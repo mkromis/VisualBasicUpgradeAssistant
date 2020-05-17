@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using VisualBasicUpgradeAssistant.Core.DataClasses;
 
 namespace VisualBasicUpgradeAssistant.Core.Model
 {
@@ -116,7 +117,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             mFormPropertyList.Add(oProperty);
         }
 
-        public void ControlAdd(Control oControl)
+        public void ControlAdd(ControlType oControl)
         {
             mControlList.Add(oControl);
         }
