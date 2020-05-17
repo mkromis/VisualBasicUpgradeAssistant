@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <None Update="vb2c.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
