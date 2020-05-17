@@ -3,8 +3,8 @@ using System.Collections;
 using System.Drawing;
 using System.IO;
 using System.Text;
-using System.Windows.Forms;
 using System.Xml;
+using VisualBasicUpgradeAssistant.Core.DataClasses;
 
 namespace VisualBasicUpgradeAssistant.Core.Model
 {
@@ -101,7 +101,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             if (targetModule.MenuUsed)
             {
                 // add main menu control
-                Control oControl = new Control
+                ControlType oControl = new ControlType
                 {
                     Name = "MainMenu",
                     Owner = targetModule.Name,
@@ -110,7 +110,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     InvisibleAtRuntime = true
                 };
                 targetModule.ControlList.Insert(0, oControl);
-                foreach (Control oMenuControl in targetModule.ControlList)
+                foreach (ControlType oMenuControl in targetModule.ControlList)
                     if (oMenuControl.Type == "MenuItem" && oMenuControl.Owner == targetModule.Name)
                         // rewrite previous owner
                         oMenuControl.Owner = oControl.Name;
@@ -120,7 +120,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             Int32 TabControlIndex = 0;
 
             // check for TabDlg.SSTab
-            foreach (Control oTargetControl in targetModule.ControlList)
+            foreach (ControlType oTargetControl in targetModule.ControlList)
             {
                 if (oTargetControl.Type == "TabControl" && oTargetControl.Valid)
                 {
@@ -129,7 +129,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     //          this.tabPage1 = new System.Windows.Forms.TabPage();
 
                     Int32 Index = 0;
-                    Control oTabPage = null;
+                    ControlType oTabPage = null;
                     // each property  
                     foreach (ControlProperty oTargetProperty in oTargetControl.PropertyList)
                     {
@@ -141,7 +141,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         if (oTargetProperty.Name.IndexOf("TabCaption(" + Index.ToString() + ")", 0) > -1)
                         {
                             // new tab
-                            oTabPage = new Control
+                            oTabPage = new ControlType
                             {
                                 Type = "TabPage",
                                 Name = "tabPage" + Index.ToString(),
@@ -197,7 +197,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 TabName = GetControlIndexName(TabName);
                                 // search for "oTargetProperty.Value" control
                                 // and replace owner of this control to current tab
-                                foreach (Control oNewOwner in targetModule.ControlList)
+                                foreach (ControlType oNewOwner in targetModule.ControlList)
                                     if (oNewOwner.Name == TabName && !oNewOwner.InvisibleAtRuntime)
                                         oNewOwner.Owner = oTabPage.Name;
                             }
@@ -210,7 +210,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             {
                 // right order of tabs
                 Int32 Position = 0;
-                foreach (Control oControl in TempControlList)
+                foreach (ControlType oControl in TempControlList)
                 {
                     targetModule.ControlList.Insert(TabControlIndex + Position, oControl);
                     Position++;
@@ -254,9 +254,9 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         {
             String Type = String.Empty;
 
-            foreach (Control oSourceControl in sourceControlList)
+            foreach (ControlType oSourceControl in sourceControlList)
             {
-                Control oTargetControl = new Control
+                ControlType oTargetControl = new ControlType
                 {
                     Name = oSourceControl.Name,
                     Owner = oSourceControl.Owner,
@@ -572,7 +572,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         }
 
 
-        public Boolean ParseControlProperties(Module module, Control control,
+        public Boolean ParseControlProperties(Module module, ControlType control,
                                                     ArrayList sourcePropertyList,
                                                     ArrayList targetPropertyList)
         {

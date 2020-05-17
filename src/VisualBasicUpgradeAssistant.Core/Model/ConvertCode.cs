@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Resources;
 using System.Text;
+using VisualBasicUpgradeAssistant.Core.DataClasses;
 
 namespace VisualBasicUpgradeAssistant.Core.Model
 {
@@ -163,7 +164,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             String sType = null;
             Int32 iPosition = 0;
             Int32 iLevel = 0;
-            Control oControl = null;
+            ControlType oControl = null;
             ControlProperty oNestedProperty = null;
             Boolean bNestedProperty = false;
 
@@ -213,7 +214,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 break;
                             default:
                                 // new control
-                                oControl = new Control
+                                oControl = new ControlType
                                 {
                                     Name = sName,
                                     Type = sType
@@ -398,7 +399,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             Variable oVariable = null;
             Property oProperty = null;
             Procedure oProcedure = null;
-            Enum oEnum = null;
+            EnumType oEnum = null;
             EnumItem oEnumItem = null;
 
             while (reader.Peek() > -1)
@@ -467,7 +468,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 break;
 
                             case "Enum":
-                                oEnum = new Enum
+                                oEnum = new EnumType
                                 {
                                     Scope = scope
                                 };
@@ -839,13 +840,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             switch (tempString)
             {
                 case "Sub":
-                    procedure.Type = PROCEDURE_TYPE.PROCEDURE_SUB;
+                    procedure.Type = ProcedureType.PROCEDURE_SUB;
                     break;
                 case "Function":
-                    procedure.Type = PROCEDURE_TYPE.PROCEDURE_FUNCTION;
+                    procedure.Type = ProcedureType.PROCEDURE_FUNCTION;
                     break;
                 case "Event":
-                    procedure.Type = PROCEDURE_TYPE.PROCEDURE_EVENT;
+                    procedure.Type = ProcedureType.PROCEDURE_EVENT;
                     break;
             }
 
@@ -870,7 +871,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             }
 
             // and return type of function
-            if (procedure.Type == PROCEDURE_TYPE.PROCEDURE_FUNCTION)
+            if (procedure.Type == ProcedureType.PROCEDURE_FUNCTION)
             {
                 // as
                 position++;
@@ -944,7 +945,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             if (_targetModule.Type == "form")
             {
                 // list of controls
-                foreach (Control oControl in _targetModule.ControlList)
+                foreach (ControlType oControl in _targetModule.ControlList)
                 {
                     if (!oControl.Valid)
                         oResult.Append("//");
@@ -993,7 +994,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     oResult.Append(Indent6 + "System.Resources.ResourceManager resources = " +
                       "new System.Resources.ResourceManager(typeof(" + _targetModule.Name + "));\r\n");
 
-                foreach (Control oControl in _targetModule.ControlList)
+                foreach (ControlType oControl in _targetModule.ControlList)
                 {
                     if (!oControl.Valid)
                         oResult.Append("//");
@@ -1007,7 +1008,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 oResult.Append(Indent6 + "this.SuspendLayout();\r\n");
                 // this.Frame1.ResumeLayout(false);
                 // resume layout for each container
-                foreach (Control oControl in _targetModule.ControlList)
+                foreach (ControlType oControl in _targetModule.ControlList)
                     // check if control is container
                     // !! for menu controls
                     if (oControl.Container && !(oControl.Type == "MenuItem") && !(oControl.Type == "MainMenu"))
@@ -1018,7 +1019,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     }
 
                 // each controls and his property		  
-                foreach (Control oControl in _targetModule.ControlList)
+                foreach (ControlType oControl in _targetModule.ControlList)
                 {
                     oResult.Append(Indent6 + "//\r\n");
                     oResult.Append(Indent6 + "// " + oControl.Name + "\r\n");
@@ -1040,7 +1041,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                     // if control is container for other controls
                     temp = String.Empty;
-                    foreach (Control oControl1 in _targetModule.ControlList)
+                    foreach (ControlType oControl1 in _targetModule.ControlList)
                         // all controls ownered by current control
                         if (oControl1.Owner == oControl.Name && !oControl1.InvisibleAtRuntime)
                             temp = temp + Indent6 + Indent6 + "this." + oControl1.Name + ",\r\n";
@@ -1076,7 +1077,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
 
                 // add control range to form
-                foreach (Control oControl in _targetModule.ControlList)
+                foreach (ControlType oControl in _targetModule.ControlList)
                 {
                     if (!oControl.Valid)
                         oResult.Append("//");
@@ -1095,7 +1096,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 // exception for menu
                 // this.Menu = this.mainMenu1;
                 if (_targetModule.MenuUsed)
-                    foreach (Control oControl in _targetModule.ControlList)
+                    foreach (ControlType oControl in _targetModule.ControlList)
                         if (oControl.Type == "MainMenu")
                             oResult.Append(Indent6 + "      this.Menu = " + oControl.Name + ";\r\n");
                 // form properties
@@ -1111,7 +1112,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                 // this.Frame1.ResumeLayout(false);
                 // resume layout for each container
-                foreach (Control oControl in _targetModule.ControlList)
+                foreach (ControlType oControl in _targetModule.ControlList)
                     // check if control is container
                     if (oControl.Container && !(oControl.Type == "MenuItem") && !(oControl.Type == "MainMenu"))
                     {
@@ -1134,7 +1135,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             if (_targetModule.EnumList.Count > 0)
             {
                 oResult.Append("\r\n");
-                foreach (Enum oEnum in _targetModule.EnumList)
+                foreach (EnumType oEnum in _targetModule.EnumList)
                 {
                     // public enum VB_FILE_TYPE
                     oResult.Append(Indent4 + oEnum.Scope + " enum " + oEnum.Name + "\r\n");
@@ -1222,13 +1223,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     oResult.Append(Indent4 + oProcedure.Scope + " ");
                     switch (oProcedure.Type)
                     {
-                        case PROCEDURE_TYPE.PROCEDURE_SUB:
+                        case ProcedureType.PROCEDURE_SUB:
                             oResult.Append("void");
                             break;
-                        case PROCEDURE_TYPE.PROCEDURE_FUNCTION:
+                        case ProcedureType.PROCEDURE_FUNCTION:
                             oResult.Append(oProcedure.ReturnType);
                             break;
-                        case PROCEDURE_TYPE.PROCEDURE_EVENT:
+                        case ProcedureType.PROCEDURE_EVENT:
                             oResult.Append("void");
                             break;
                     }
