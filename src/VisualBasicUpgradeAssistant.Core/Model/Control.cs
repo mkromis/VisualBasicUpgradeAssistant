@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 
-namespace VB2C
+namespace VisualBasicUpgradeAssistant.Core.Model
 {
     /// <summary>
     /// Summary description for Control.

@@ -6,13 +6,14 @@ using System.IO;
 using System.Windows.Forms;
 using System.Data;
 using VisualBasicUpgradeAssistant.WinForms;
+using VisualBasicUpgradeAssistant.Core.Model;
 
 namespace VB2C
 {
-	/// <summary>
-	/// Summary description for Form1.
-	/// </summary>
-	public class FrmConvert : System.Windows.Forms.Form
+    /// <summary>
+    /// Summary description for Form1.
+    /// </summary>
+    public class FrmConvert : System.Windows.Forms.Form
 	{
     private System.Windows.Forms.TextBox txtVB6;
     private System.Windows.Forms.Button cmdLoad;
