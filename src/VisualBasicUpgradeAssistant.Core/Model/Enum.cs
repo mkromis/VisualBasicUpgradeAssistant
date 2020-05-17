@@ -3,36 +3,36 @@ using System.Collections;
 
 namespace VB2C
 {
-	/// <summary>
-	/// Summary description for Enum.
-	/// </summary>
-	public class Enum
-	{
-    private string mName;
-    private string mScope;
-    private ArrayList mItemList;
-
-    public Enum()
+    /// <summary>
+    /// Summary description for Enum.
+    /// </summary>
+    public class Enum
     {
-      mItemList = new ArrayList();
+        private string mName;
+        private string mScope;
+        private ArrayList mItemList;
+
+        public Enum()
+        {
+            mItemList = new ArrayList();
+        }
+
+        public string Name
+        {
+            get { return mName; }
+            set { mName = value; }
+        }
+
+        public string Scope
+        {
+            get { return mScope; }
+            set { mScope = value; }
+        }
+
+        public ArrayList ItemList
+        {
+            get { return mItemList; }
+            set { mItemList = value; }
+        }
     }
-	  
-    public string Name 
-    {
-      get { return mName; }
-      set { mName = value; }
-    }
-
-    public string Scope 
-    {
-      get { return mScope; }
-      set { mScope = value; }
-    }	 
-
-    public ArrayList ItemList 
-    {
-      get { return mItemList; }
-      set { mItemList = value; }
-    } 
-	}
 }

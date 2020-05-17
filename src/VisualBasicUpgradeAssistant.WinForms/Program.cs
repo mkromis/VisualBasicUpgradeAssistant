@@ -8,27 +8,27 @@ using VB2C;
 
 namespace VisualBasicUpgradeAssistant.WinForms
 {
-    sealed class Program
+    public sealed class Program
     {
         public static XMLConfig Config;
-        public static frmConvert MainForm;
+        public static FrmConvert MainForm;
 
         // configuration constants
-        private const string CONFIG_FILE = "vb2c.xml";
-        public const string CONFIG_SETTING = "Setting";
-        public const string CONFIG_OUT_PATH = "OutPath";
+        private const String CONFIG_FILE = "vb2c.xml";
+        public const String CONFIG_SETTING = "Setting";
+        public const String CONFIG_OUT_PATH = "OutPath";
 
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        public static void Main()
         {
             // get current directory
-            string[] CommandLineArgs;
+            String[] CommandLineArgs;
             CommandLineArgs = Environment.GetCommandLineArgs();
             // index 0 contain path and name of exe file
-            string sBinPath = Path.GetDirectoryName(CommandLineArgs[0].ToLower());
+            String sBinPath = Path.GetDirectoryName(CommandLineArgs[0].ToLower());
 
             // create configuration object
             Config = new XMLConfig(sBinPath + Path.DirectorySeparatorChar + CONFIG_FILE);
@@ -37,7 +37,7 @@ namespace VisualBasicUpgradeAssistant.WinForms
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmConvert());
+            Application.Run(new FrmConvert());
         }
     }
 }

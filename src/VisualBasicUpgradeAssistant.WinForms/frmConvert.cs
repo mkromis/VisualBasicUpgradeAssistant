@@ -12,7 +12,7 @@ namespace VB2C
 	/// <summary>
 	/// Summary description for Form1.
 	/// </summary>
-	public class frmConvert : System.Windows.Forms.Form
+	public class FrmConvert : System.Windows.Forms.Form
 	{
     private System.Windows.Forms.TextBox txtVB6;
     private System.Windows.Forms.Button cmdLoad;
@@ -24,7 +24,7 @@ namespace VB2C
     private System.Windows.Forms.Label label1;
     private System.ComponentModel.IContainer components = null;
 	  
-		public frmConvert()
+		public FrmConvert()
 		{
 			//
 			// Required for Windows Form Designer support
@@ -58,7 +58,7 @@ namespace VB2C
 		/// </summary>
 					
 		private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmConvert));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmConvert));
             this.cmdExit = new System.Windows.Forms.Button();
             this.label = new System.Windows.Forms.Label();
             this.txtCSharp = new System.Windows.Forms.TextBox();
