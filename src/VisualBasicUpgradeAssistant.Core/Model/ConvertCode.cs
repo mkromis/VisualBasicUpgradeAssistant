@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Resources;
@@ -8,12 +9,12 @@ using VisualBasicUpgradeAssistant.Core.DataClasses;
 
 namespace VisualBasicUpgradeAssistant.Core.Model
 {
-    public enum VB_FILE_TYPE
+    public enum FileType
     {
-        VB_FILE_UNKNOWN = 0,
-        VB_FILE_FORM = 1,
-        VB_FILE_MODULE = 2,
-        VB_FILE_CLASS = 3
+        Unknown = 0,
+        Form = 1,
+        Module = 2,
+        Class = 3
     };
 
     /// <summary>
@@ -21,7 +22,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
     /// </summary>
     public class ConvertCode
     {
-        private VB_FILE_TYPE _fileType;
+        private FileType _fileType;
         private Module _sourceModule;
         private Module _targetModule;
         private readonly ArrayList _ownerStock;
@@ -46,21 +47,21 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         public Boolean ParseFile(String fileName, String outPath)
         {
-            String line = String.Empty;
-            String temp = String.Empty;
-            String extension = String.Empty;
+            String line;
+            String temp;
+            String extension;
             String version = String.Empty;
-            Boolean result = false;
-            Int32 position = 0;
+            Boolean result;
+            Int32 position;
 
             // try recognize source code type depend by file extension
             extension = fileName.Substring(fileName.Length - 3, 3);
             _fileType = (extension.ToUpper()) switch
             {
-                "FRM" => VB_FILE_TYPE.VB_FILE_FORM,
-                "BAS" => VB_FILE_TYPE.VB_FILE_MODULE,
-                "CLS" => VB_FILE_TYPE.VB_FILE_CLASS,
-                _ => VB_FILE_TYPE.VB_FILE_UNKNOWN,
+                "FRM" => FileType.Form,
+                "BAS" => FileType.Module,
+                "CLS" => FileType.Class,
+                _ => FileType.Unknown,
             };
 
             // open file
@@ -79,7 +80,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 // module first line
                 // 'Attribute VB_Name = "ModuleName"'
                 case MODULE_FIRST_LINE:
-                    _fileType = VB_FILE_TYPE.VB_FILE_MODULE;
+                    _fileType = FileType.Module;
                     break;
                 // form or class first line
                 // 'VERSION 5.00' or 'VERSION 1.0 CLASS' 
@@ -90,16 +91,16 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     //            Debug.WriteLine (Line + " " + Version);
 
                     if (line.IndexOf(CLASS_FIRST_LINE, 0) > -1)
-                        _fileType = VB_FILE_TYPE.VB_FILE_CLASS;
+                        _fileType = FileType.Class;
                     else
-                        _fileType = VB_FILE_TYPE.VB_FILE_FORM;
+                        _fileType = FileType.Form;
                     break;
                 default:
-                    _fileType = VB_FILE_TYPE.VB_FILE_UNKNOWN;
+                    _fileType = FileType.Unknown;
                     break;
             }
             // if file is still unknown
-            if (_fileType == VB_FILE_TYPE.VB_FILE_UNKNOWN)
+            if (_fileType == FileType.Unknown)
             {
                 ActionResult = "Unknown file type";
                 return false;
@@ -150,97 +151,97 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             return result;
         }
 
-        private Boolean ParseForm(StreamReader oReader)
+        private Boolean ParseForm(StreamReader reader)
         {
-            Boolean bProcess = false;
-            Boolean bFinish = false;
-            Boolean bEnd = true;
-            String sLine = null;
-            String sName = null;
-            String sOwner = null;
-            String sTemp = null;
-            Int32 iTemp = 0;
-            Int32 iComment = 0;
-            String sType = null;
-            Int32 iPosition = 0;
-            Int32 iLevel = 0;
-            ControlType oControl = null;
-            ControlProperty oNestedProperty = null;
+            Boolean process = false;
+            Boolean finish = false;
+            Boolean end = true;
+            String line;
+            String name;
+            String owner = null;
+            String word;
+            Int32 index;
+            Int32 comment;
+            String type;
+            Int32 position = 0;
+            Int32 level = 0;
+            ControlType control = null;
+            ControlProperty nestedProperty = null;
             Boolean bNestedProperty = false;
 
             // parse only visual part of form
-            while (!bFinish) // ( ( bFinish || (oReader.Peek() > -1)) )
+            while (!finish) // ( ( bFinish || (oReader.Peek() > -1)) )
             {
-                sLine = oReader.ReadLine();
-                sLine = sLine.Trim();
-                iPosition = 0;
+                line = reader.ReadLine();
+                line = line.Trim();
+                position = 0;
                 // get first word in line
-                sTemp = GetWord(sLine, ref iPosition);
-                switch (sTemp)
+                word = GetWord(line, ref position);
+                switch (word)
                 {
                     case "Begin":
-                        bProcess = true;
+                        process = true;
                         // new level
-                        iLevel++;
+                        level++;
                         // next word - control type
-                        iPosition++;
-                        sType = GetWord(sLine, ref iPosition);
+                        position++;
+                        type = GetWord(line, ref position);
                         // next word - control name
-                        iPosition++;
-                        sName = GetWord(sLine, ref iPosition);
+                        position++;
+                        name = GetWord(line, ref position);
                         // detected missing end -> it indicate that next control is container
-                        if (!bEnd)
+                        if (!end)
                         {
                             // add container control to colection
-                            if (!(oControl == null))
+                            if (!(control == null))
                             {
-                                oControl.Container = true;
-                                _sourceModule.ControlAdd(oControl);
+                                control.Container = true;
+                                _sourceModule.ControlList.Add(control);
                             }
                             // save name of previous control as owner for current and next controls
-                            _ownerStock.Add(sOwner);
+                            _ownerStock.Add(owner);
                         }
-                        bEnd = false;
+                        end = false;
 
-                        switch (sType)
+                        switch (type)
                         {
                             case "Form":            // VERSION 2.00 - VB3
                             case "VB.Form":
                             case "VB.MDIForm":
-                                _sourceModule.Name = sName;
+                                _sourceModule.Name = name;
                                 // first owner
                                 // save control name for possible next controls as owner
-                                sOwner = sName;
+                                owner = name;
                                 break;
                             default:
                                 // new control
-                                oControl = new ControlType
+                                control = new ControlType
                                 {
-                                    Name = sName,
-                                    Type = sType
+                                    Name = name,
+                                    Type = type
                                 };
                                 // save control name for possible next controls as owner
-                                sOwner = sName;
+                                owner = name;
                                 // set current container name
-                                oControl.Owner = (String)_ownerStock[_ownerStock.Count - 1];
+                                control.Owner = (String)_ownerStock[_ownerStock.Count - 1];
                                 break;
                         }
                         break;
 
                     case "End":
                         // double end - we leaving some container
-                        if (bEnd)
+                        if (end)
                             // remove last item from stock
                             _ownerStock.Remove((String)_ownerStock[_ownerStock.Count - 1]);
                         else
                             // level 1 is form and all higher levels are controls
-                            if (iLevel > 1)
+                            if (level > 1)
                             // add control to colection
-                            _sourceModule.ControlAdd(oControl);
+                            _sourceModule.ControlList.Add(control);
                         // form or control end detected
-                        bEnd = true;
+                        end = true;
                         // back to previous level
-                        iLevel--;
+                        level--;
 
                         break;
 
@@ -251,59 +252,59 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     case "BeginProperty":
                         bNestedProperty = true;
 
-                        oNestedProperty = new ControlProperty();
+                        nestedProperty = new ControlProperty();
                         // next word - nested property name
-                        iPosition++;
-                        sName = GetWord(sLine, ref iPosition);
-                        oNestedProperty.Name = sName;
+                        position++;
+                        name = GetWord(line, ref position);
+                        nestedProperty.Name = name;
                         //            Debug.WriteLine(sName); 
                         break;
 
                     case "EndProperty":
                         bNestedProperty = false;
                         // add property to control or form
-                        if (iLevel == 1)
+                        if (level == 1)
                             // add property to form
-                            _sourceModule.FormPropertyAdd(oNestedProperty);
+                            _sourceModule.FormPropertyList.Add(nestedProperty);
                         else
                             // to controls
-                            oControl.PropertyAdd(oNestedProperty);
+                            control.PropertyList.Add(nestedProperty);
                         break;
 
                     default:
                         // parse property
-                        ControlProperty oProperty = new ControlProperty();
+                        ControlProperty property = new ControlProperty();
 
-                        iTemp = sLine.IndexOf("=");
-                        if (iTemp > -1)
+                        index = line.IndexOf("=");
+                        if (index > -1)
                         {
-                            oProperty.Name = sLine.Substring(0, iTemp - 1).Trim();
-                            iComment = sLine.IndexOf("'", iTemp);
-                            if (iComment > -1)
+                            property.Name = line.Substring(0, index - 1).Trim();
+                            comment = line.IndexOf("'", index);
+                            if (comment > -1)
                             {
-                                oProperty.Value = sLine.Substring(iTemp + 1, iComment - iTemp - 1).Trim();
-                                oProperty.Comment = sLine.Substring(iComment + 1, sLine.Length - iComment - 1).Trim();
+                                property.Value = line.Substring(index + 1, comment - index - 1).Trim();
+                                property.Comment = line.Substring(comment + 1, line.Length - comment - 1).Trim();
                             }
                             else
-                                oProperty.Value = sLine.Substring(iTemp + 1, sLine.Length - iTemp - 1).Trim();
+                                property.Value = line.Substring(index + 1, line.Length - index - 1).Trim();
 
                             if (bNestedProperty)
-                                oNestedProperty.PropertyList.Add(oProperty);
+                                nestedProperty.PropertyList.Add(property);
                             else
                                 // depend by level insert property to form or control
-                                if (iLevel > 1)
+                                if (level > 1)
                                 // add property to control
-                                oControl.PropertyAdd(oProperty);
+                                control.PropertyList.Add(property);
                             else
                                 // add property to form
-                                _sourceModule.FormPropertyAdd(oProperty);
+                                _sourceModule.FormPropertyList.Add(property);
                         }
                         break;
                 }
 
-                if (iLevel == 0 && bProcess)
+                if (level == 0 && process)
                     // visual part of form is finish
-                    bFinish = true;
+                    finish = true;
 
             }
             return true;
@@ -311,8 +312,8 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         private Boolean ParseModule(StreamReader reader)
         {
-            String line = String.Empty;
-            Int32 position = 0;
+            String line;
+            Int32 position;
 
             // name of module
             // Attribute VB_Name = "ModuleName"
@@ -333,9 +334,9 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         private Boolean ParseClass(StreamReader reader)
         {
-            Int32 Position = 0;
-            String line = null;
-            String tempString = String.Empty;
+            Int32 position = 0;
+            String line;
+            String word;
 
             //VERSION 1.0 CLASS
             //BEGIN
@@ -352,23 +353,23 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
             while (reader.Peek() > -1)
             {
-                Position = 0;
+                position = 0;
                 // verify type of file based on first line
                 // form, module, class
                 line = reader.ReadLine();
                 // next word - control type
-                tempString = GetWord(line, ref Position);
-                if (tempString == "Attribute")
+                word = GetWord(line, ref position);
+                if (word == "Attribute")
                 {
-                    Position++;
-                    tempString = GetWord(line, ref Position);
-                    switch (tempString)
+                    position++;
+                    word = GetWord(line, ref position);
+                    switch (word)
                     {
                         case "VB_Name":
-                            Position++;
-                            tempString = GetWord(line, ref Position);
-                            Position++;
-                            _sourceModule.Name = GetWord(line, ref Position);
+                            position++;
+                            word = GetWord(line, ref position);
+                            position++;
+                            _sourceModule.Name = GetWord(line, ref position);
                             break;
 
                         case "VB_Exposed":
@@ -382,10 +383,10 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         private Boolean ParseProcedures(StreamReader reader)
         {
-            String line = null;
-            String tempString = null;
+            String line;
+            String tempString;
             String comments = null;
-            String scope = null;
+            String scope;
 
             Int32 position = 0;
             //bool bProcess = false;
@@ -396,11 +397,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             Boolean bProcedure = false;
             Boolean bEnd = false;
 
-            Variable oVariable = null;
-            Property oProperty = null;
-            Procedure oProcedure = null;
-            EnumType oEnum = null;
-            EnumItem oEnumItem = null;
+            Variable variable = null;
+            Property property = null;
+            Procedure procedure = null;
+            EnumType enumType = null;
+            EnumItem enumItem = null;
 
             while (reader.Peek() > -1)
             {
@@ -457,41 +458,41 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             case "Sub":
                             case "Function":
 
-                                oProcedure = new Procedure
+                                procedure = new Procedure
                                 {
                                     Comment = comments
                                 };
                                 comments = String.Empty;
-                                ParseProcedureName(oProcedure, line);
+                                ParseProcedureName(procedure, line);
 
                                 bProcedure = true;
                                 break;
 
                             case "Enum":
-                                oEnum = new EnumType
+                                enumType = new EnumType
                                 {
                                     Scope = scope
                                 };
                                 // next word is enum name
                                 position++;
-                                oEnum.Name = GetWord(line, ref position);
+                                enumType.Name = GetWord(line, ref position);
                                 bEnum = true;
                                 break;
 
                             case "Property":
-                                oProperty = new Property
+                                property = new Property
                                 {
                                     Comment = comments
                                 };
                                 comments = String.Empty;
-                                ParsePropertyName(oProperty, line);
+                                ParsePropertyName(property, line);
                                 bProperty = true;
 
                                 break;
                             default:
                                 // variable declaration
-                                oVariable = new Variable();
-                                ParseVariableDeclaration(oVariable, line);
+                                variable = new Variable();
+                                ParseVariableDeclaration(variable, line);
                                 bVariable = true;
                                 break;
                         }
@@ -500,12 +501,12 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                     case "Dim":
                         // variable declaration
-                        oVariable = new Variable
+                        variable = new Variable
                         {
                             Comment = comments
                         };
                         comments = String.Empty;
-                        ParseVariableDeclaration(oVariable, line);
+                        ParseVariableDeclaration(variable, line);
                         bVariable = true;
                         break;
 
@@ -524,20 +525,20 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         if (bEnum)
                         {
                             // first word is name, second =, thirt value if is preset
-                            oEnumItem = new EnumItem
+                            enumItem = new EnumItem
                             {
                                 Comment = comments
                             };
                             comments = String.Empty;
-                            ParseEnumItem(oEnumItem, line);
+                            ParseEnumItem(enumItem, line);
                             // add item
-                            oEnum.ItemList.Add(oEnumItem);
+                            enumType.ItemList.Add(enumItem);
                         }
                         if (bProperty)
                             // add line of property
-                            oProperty.LineList.Add(line);
+                            property.LineList.Add(line);
                         if (bProcedure)
-                            oProcedure.LineList.Add(line);
+                            procedure.LineList.Add(line);
                         break;
 
 
@@ -565,24 +566,24 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     // 
                     if (bEnum)
                     {
-                        _sourceModule.EnumList.Add(oEnum);
+                        _sourceModule.EnumList.Add(enumType);
                         bEnum = false;
                     }
                     if (bProperty)
                     {
-                        _sourceModule.PropertyAdd(oProperty);
+                        _sourceModule.PropertyList.Add(property);
                         bProperty = false;
                     }
                     if (bProcedure)
                     {
-                        _sourceModule.ProcedureAdd(oProcedure);
+                        _sourceModule.ProcedureList.Add(procedure);
                         bProcedure = false;
                     }
                     bEnd = false;
                 }
                 else
                     if (bVariable)
-                    _sourceModule.VariableAdd(oVariable);
+                    _sourceModule.VariableList.Add(variable);
 
                 bVariable = false;
             }
@@ -594,26 +595,26 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         //  BUG_LEVEL_PROJECT = 1
         //  BUG_LEVEL_VERSION = 2
         //End Enum
-        private void ParseEnumItem(EnumItem oEnumItem, String line)
+        private void ParseEnumItem(EnumItem enumItem, String line)
         {
             String TempString = String.Empty;
             Int32 iPosition = 0;
 
             line = line.Trim();
             // first word is ame
-            oEnumItem.Name = GetWord(line, ref iPosition);
+            enumItem.Name = GetWord(line, ref iPosition);
             iPosition++;
             // next word =
             TempString = GetWord(line, ref iPosition);
             iPosition++;
             // optional
-            oEnumItem.Value = GetWord(line, ref iPosition);
+            enumItem.Value = GetWord(line, ref iPosition);
         }
 
 
         //Private mlID As Long
 
-        private void ParseVariableDeclaration(Variable oVariable, String line)
+        private void ParseVariableDeclaration(Variable variable, String line)
         {
             String TempString = String.Empty;
             Int32 iPosition = 0;
@@ -625,15 +626,15 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             {
                 case "Dim":
                 case "Private":
-                    oVariable.Scope = "private";
+                    variable.Scope = "private";
                     break;
                 case "Public":
-                    oVariable.Scope = "public";
+                    variable.Scope = "public";
                     break;
                 default:
-                    oVariable.Scope = "private";
+                    variable.Scope = "private";
                     // variable name
-                    oVariable.Name = TempString;
+                    variable.Name = TempString;
                     Status = true;
                     break;
             }
@@ -643,7 +644,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             {
                 iPosition++;
                 TempString = GetWord(line, ref iPosition);
-                oVariable.Name = TempString;
+                variable.Name = TempString;
             }
             // As 
             iPosition++;
@@ -651,7 +652,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             // variable type
             iPosition++;
             TempString = GetWord(line, ref iPosition);
-            oVariable.Type = TempString;
+            variable.Type = TempString;
 
         }
 
@@ -664,7 +665,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         //  FormType = FORM_ATTACHEMENT
         //End Property
 
-        private void ParsePropertyName(Property oProperty, String line)
+        private void ParsePropertyName(Property property, String line)
         {
             String TempString = String.Empty;
             Int32 iPosition = 0;
@@ -676,13 +677,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             switch (TempString)
             {
                 case "Private":
-                    oProperty.Scope = "private";
+                    property.Scope = "private";
                     break;
                 case "Public":
-                    oProperty.Scope = "public";
+                    property.Scope = "public";
                     break;
                 default:
-                    oProperty.Scope = "private";
+                    property.Scope = "private";
                     Status = true;
                     break;
             }
@@ -697,14 +698,14 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             // direction Let,Get, Set
             iPosition++;
             TempString = GetWord(line, ref iPosition);
-            oProperty.Direction = TempString;
+            property.Direction = TempString;
 
             //Public Property Let ParentID(ByVal lValue As Long)
 
             // name       
             Start = iPosition;
             iPosition = line.IndexOf("(", Start + 1);
-            oProperty.Name = line.Substring(Start, iPosition - Start);
+            property.Name = line.Substring(Start, iPosition - Start);
 
             // + possible parameters
             iPosition++;
@@ -714,10 +715,10 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             if (iPosition - Start > 0)
             {
                 TempString = line.Substring(Start, iPosition - Start);
-                ArrayList ParameterList = new ArrayList();
+                List<Parameter> ParameterList = new List<Parameter>();
                 // process parametres
                 ParseParametries(ParameterList, TempString);
-                oProperty.ParameterList = ParameterList;
+                property.ParameterList = ParameterList;
             }
 
             // As 
@@ -728,13 +729,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             // type
             iPosition++;
             TempString = GetWord(line, ref iPosition);
-            oProperty.Type = TempString;
+            property.Type = TempString;
 
         }
 
         // ByVal lValue As Long, ByVal sValue As string
 
-        private void ParseParametries(ArrayList parametreList, String line)
+        private void ParseParametries(List<Parameter> parametreList, String line)
         {
             Boolean bFinish = false;
             Int32 Position = 0;
@@ -840,13 +841,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             switch (tempString)
             {
                 case "Sub":
-                    procedure.Type = ProcedureType.PROCEDURE_SUB;
+                    procedure.Type = ProcedureType.Subroutine;
                     break;
                 case "Function":
-                    procedure.Type = ProcedureType.PROCEDURE_FUNCTION;
+                    procedure.Type = ProcedureType.Function;
                     break;
                 case "Event":
-                    procedure.Type = ProcedureType.PROCEDURE_EVENT;
+                    procedure.Type = ProcedureType.Event;
                     break;
             }
 
@@ -864,14 +865,14 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             if (position - start > 0)
             {
                 tempString = line.Substring(start, position - start);
-                ArrayList ParameterList = new ArrayList();
+                List<Parameter> ParameterList = new List<Parameter>();
                 // process parametres
                 ParseParametries(ParameterList, tempString);
                 procedure.ParameterList = ParameterList;
             }
 
             // and return type of function
-            if (procedure.Type == ProcedureType.PROCEDURE_FUNCTION)
+            if (procedure.Type == ProcedureType.Function)
             {
                 // as
                 position++;
@@ -1223,13 +1224,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     oResult.Append(Indent4 + oProcedure.Scope + " ");
                     switch (oProcedure.Type)
                     {
-                        case ProcedureType.PROCEDURE_SUB:
+                        case ProcedureType.Subroutine:
                             oResult.Append("void");
                             break;
-                        case ProcedureType.PROCEDURE_FUNCTION:
+                        case ProcedureType.Function:
                             oResult.Append(oProcedure.ReturnType);
                             break;
-                        case ProcedureType.PROCEDURE_EVENT:
+                        case ProcedureType.Event:
                             oResult.Append("void");
                             break;
                     }
@@ -1267,7 +1268,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             return oResult.ToString();
         }
 
-        private void WriteResX(ArrayList imageList, String outPath, String moduleName)
+        private void WriteResX(List<String> imageList, String outPath, String moduleName)
         {
             String sResxName;
 

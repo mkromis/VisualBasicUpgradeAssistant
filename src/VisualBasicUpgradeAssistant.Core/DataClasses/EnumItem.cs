@@ -8,9 +8,7 @@ namespace VisualBasicUpgradeAssistant.Core.DataClasses
     public class EnumItem
     {
         public String Name { get; set; }
-
         public String Value { get; set; }
-
         public String Comment { get; set; }
     }
 }

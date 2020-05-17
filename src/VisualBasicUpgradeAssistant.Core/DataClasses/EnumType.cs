@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace VisualBasicUpgradeAssistant.Core.DataClasses
 {
@@ -8,15 +9,13 @@ namespace VisualBasicUpgradeAssistant.Core.DataClasses
     /// </summary>
     public class EnumType
     {
+        public String Name { get; set; }
+        public String Scope { get; set; }
+        public List<EnumItem> ItemList { get; }
+
         public EnumType()
         {
-            ItemList = new ArrayList();
+            ItemList = new List<EnumItem>();
         }
-
-        public String Name { get; set; }
-
-        public String Scope { get; set; }
-
-        public ArrayList ItemList { get; private set; }
     }
 }

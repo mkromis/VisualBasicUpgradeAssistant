@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace VisualBasicUpgradeAssistant.Core.DataClasses
 {
@@ -9,28 +10,16 @@ namespace VisualBasicUpgradeAssistant.Core.DataClasses
     public class ControlType
     {
         public String Name { get; set; }
-
         public String Type { get; set; }
-
         public String Owner { get; set; }
-
         public Boolean Container { get; set; }
-
         public Boolean Valid { get; set; }
-
         public Boolean InvisibleAtRuntime { get; set; }
+        public List<ControlProperty> PropertyList { get; }
 
         public ControlType()
         {
-            PropertyList = new ArrayList();
+            PropertyList = new List<ControlProperty>();
         }
-
-        public ArrayList PropertyList { get; private set; }
-
-        public void PropertyAdd(ControlProperty oProperty)
-        {
-            PropertyList.Add(oProperty);
-        }
-
     }
 }
