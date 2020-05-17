@@ -5,27 +5,23 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 {
     public class XMLConfig
     {
-        XmlDocument Doc = new XmlDocument();
-        private string msFileName;
-        private bool doesExist;
+        private XmlDocument _doc = new XmlDocument();
+        private Boolean _doesExist;
 
-        public string FileName
-        {
-            get { return msFileName; }
-        }
+        public String FileName { get; }
 
-        public XMLConfig(string sFileName)
+        public XMLConfig(String fileName)
         {
-            msFileName = sFileName;
+            FileName = fileName;
             try
             {
-                Doc.Load(msFileName);
-                doesExist = true;
+                _doc.Load(FileName);
+                _doesExist = true;
             }
             catch
             {
-                Doc.LoadXml("<configuration>" + "</configuration>");
-                Doc.Save(msFileName);
+                _doc.LoadXml("<configuration>" + "</configuration>");
+                _doc.Save(FileName);
             }
         }
 
@@ -33,111 +29,108 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         //  
         // **********************************************************************************
 
-        public bool ReadBool(string aSection, string aKey, bool bDefaultValue)
+        public Boolean ReadBool(String section, String key, Boolean defaultValue)
         {
-            string sResult;
+            String result;
 
             // return immediately if the file didn't exist
-            if (doesExist == false)
-                return bDefaultValue;
-            if (aSection == "")
-                return bDefaultValue;
-            if (aKey == "")
-                return bDefaultValue;
-            sResult = getKeyValue(aSection, aKey, bDefaultValue.ToString());
+            if (_doesExist == false)
+                return defaultValue;
+            if (section == "")
+                return defaultValue;
+            if (key == "")
+                return defaultValue;
+            result = getKeyValue(section, key, defaultValue.ToString());
 
-            if (sResult.ToLower() == "true")
-                return true;
-            else
-                return false;
+            return result.ToLower() == "true";
         }
 
-        public int ReadInt(string aSection, string aKey, int iDefaultValue)
+        public Int32 ReadInt(String section, String key, Int32 defaultValue)
         {
-            string sResult;
+            String result;
 
             // return immediately if the file didn't exist
-            if (doesExist == false)
-                return iDefaultValue;
-            if (aSection == "")
-                return iDefaultValue;
-            if (aKey == "")
-                return iDefaultValue;
-            sResult = getKeyValue(aSection, aKey, iDefaultValue.ToString());
-            return int.Parse(sResult);
+            if (_doesExist == false)
+                return defaultValue;
+            if (section == "")
+                return defaultValue;
+            if (key == "")
+                return defaultValue;
+            result = getKeyValue(section, key, defaultValue.ToString());
+            return Int32.Parse(result);
         }
 
-        public string ReadString(string aSection, string aKey, string aDefaultValue)
+        public String ReadString(String section, String key, String defaultValue)
         {
             // return immediately if the file didn't exist
-            if (doesExist == false)
-                return aDefaultValue;
-            if (aSection == "")
-                return aDefaultValue;
-            if (aKey == "")
-                return aDefaultValue;
-            return getKeyValue(aSection, aKey, aDefaultValue);
+            if (_doesExist == false)
+                return defaultValue;
+            if (section == "")
+                return defaultValue;
+            if (key == "")
+                return defaultValue;
+            return getKeyValue(section, key, defaultValue);
         }
 
         // **********************************************************************************
         //  
         // **********************************************************************************
 
-        public bool WriteString(string aSection, string aKey, string sValue)
+        public Boolean WriteString(String section, String key, String value)
         {
-            return SetKeyValue(aSection, aKey, sValue);
+            return SetKeyValue(section, key, value);
         }
 
-        public bool WriteBool(string aSection, string aKey, bool bValue)
+        public Boolean WriteBool(String section, String key, Boolean value)
         {
-            string sValue;
+            String sValue;
 
-            if (bValue)
+            if (value)
                 sValue = "true";
             else
                 sValue = "false";
 
-            return SetKeyValue(aSection, aKey, sValue);
+            return SetKeyValue(section, key, sValue);
         }
 
-        public bool WriteInt(string aSection, string aKey, int iValue)
+        public Boolean WriteInt(String section, String key, Int32 iValue)
         {
-            return SetKeyValue(aSection, aKey, iValue.ToString());
+            return SetKeyValue(section, key, iValue.ToString());
         }
 
         // **********************************************************************************
         //  
         // **********************************************************************************
 
-        private bool SetKeyValue(string aSection, string aKey, string aValue)
+        private Boolean SetKeyValue(String section, String key, String value)
         {
             XmlNode node1;
             XmlNode node2;
-            bool bReturn = false;
+            Boolean result = false;
 
-            if (aKey == "")
+            if (key == "")
             // find the section, remove all its keys and remove the section
             {
-                node1 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection);
+                node1 = _doc.DocumentElement.SelectSingleNode("/configuration/" + section);
                 // if no such section, return true
                 if (node1 == null)
                     return true;                 // remove all its children
                 node1.RemoveAll();
                 // select its parent ("configuration")
-                node2 = Doc.DocumentElement.SelectSingleNode("configuration");
+                node2 = _doc.DocumentElement.SelectSingleNode("configuration");
                 // remove the section
                 node2.RemoveChild(node1);
             }
             else
             {
-                if (aValue == "")
+                if (value == "")
                 {
                     // find the section of this key
-                    node1 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection);
+                    node1 = _doc.DocumentElement.SelectSingleNode("/configuration/" + section);
                     // return if the section doesn't exist
                     if (node1 == null)
                         return true;                     // find the key
-                    node2 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection + "/" + aKey);
+                    node2 = _doc.DocumentElement.SelectSingleNode("/configuration/" + section + "/" + key);
                     // return true if the key doesn't exist
                     if (node2 == null)
                         return true;                     // remove the key
@@ -148,22 +141,22 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 {
                     // Both the Key and the Value are filled 
                     // Find the key
-                    node1 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection + "/" + aKey);
+                    node1 = _doc.DocumentElement.SelectSingleNode("/configuration/" + section + "/" + key);
                     if (node1 == null)
                     {
                         // The key doesn't exist: find the section
-                        node2 = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection);
+                        node2 = _doc.DocumentElement.SelectSingleNode("/configuration/" + section);
                         if (node2 == null)
                         {
                             // Create the section first
-                            XmlElement e = Doc.CreateElement(aSection);
+                            XmlElement e = _doc.CreateElement(section);
                             // Add the new node at the end of the children of ("configuration")
-                            node2 = Doc.DocumentElement.AppendChild(e);
+                            node2 = _doc.DocumentElement.AppendChild(e);
                             // return false if failure
                             if (node2 == null)
                                 return false;                             // now create key and value
-                            e = Doc.CreateElement(aKey);
-                            e.InnerText = aValue;
+                            e = _doc.CreateElement(key);
+                            e.InnerText = value;
                             // return false if failure
                             if (node2.AppendChild(e) == null)
                                 return false;
@@ -171,54 +164,54 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         else
                         {
                             // Create the key and put the value
-                            XmlElement e = Doc.CreateElement(aKey);
-                            e.InnerText = aValue;
+                            XmlElement e = _doc.CreateElement(key);
+                            e.InnerText = value;
                             node2.AppendChild(e);
                         }
                     }
                     else
                         // Key exists: set its Value
-                        node1.InnerText = aValue;
+                        node1.InnerText = value;
                 }
                 // Save the document
-                Doc.Save(FileName);
+                _doc.Save(FileName);
             }
-            return bReturn;
+            return result;
         }
 
-        private string getKeyValue(string aSection, string aKey, string aDefaultValue)
+        private String getKeyValue(String section, String key, String defaultValue)
         {
             XmlNode node;
-            node = Doc.DocumentElement.SelectSingleNode("/configuration/" + aSection + "/" + aKey);
+            node = _doc.DocumentElement.SelectSingleNode("/configuration/" + section + "/" + key);
             if (node == null)
-                return aDefaultValue;
+                return defaultValue;
             return node.InnerText;
         }
 
-        public string[] getchildren(string aNodeName)
+        public String[] GetChildren(String aNodeName)
         {
             XmlNode node;
-            string[] sReturn = new string[0];
+            String[] result = new String[0];
 
             // Select the root if the Node is empty
             if (aNodeName == "")
-                node = Doc.DocumentElement;
+                node = _doc.DocumentElement;
             else
                 // Select the node given
-                node = Doc.DocumentElement.SelectSingleNode(aNodeName);
+                node = _doc.DocumentElement.SelectSingleNode(aNodeName);
 
             // exit with an empty collection if nothing here
             if (node == null)
-                return sReturn;             // exit with an empty colection if the node has no children
+                return result;             // exit with an empty colection if the node has no children
             if (node.HasChildNodes == false)
-                return sReturn;             // get the nodelist of all children
+                return result;             // get the nodelist of all children
             XmlNodeList nodeList = node.ChildNodes;
-            int i;
+            Int32 i;
             // transform the Nodelist into an ordinary collection
-            sReturn = new string[nodeList.Count];
+            result = new String[nodeList.Count];
             for (i = 0; i < nodeList.Count; i++)
-                sReturn[i] = nodeList.Item(i).Name;
-            return sReturn;
+                result[i] = nodeList.Item(i).Name;
+            return result;
         }
     }
 }
