@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -250,50 +251,50 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         }
 
-        public Boolean ParseControls(Module oModule, ArrayList sourceControlList, ArrayList targetControlList)
+        public Boolean ParseControls(Module module, List<ControlType> sourceControlList, List<ControlType> targetControlList)
         {
             String Type = String.Empty;
 
-            foreach (ControlType oSourceControl in sourceControlList)
+            foreach (ControlType sourceControl in sourceControlList)
             {
-                ControlType oTargetControl = new ControlType
+                ControlType targetControl = new ControlType
                 {
-                    Name = oSourceControl.Name,
-                    Owner = oSourceControl.Owner,
-                    Container = oSourceControl.Container,
+                    Name = sourceControl.Name,
+                    Owner = sourceControl.Owner,
+                    Container = sourceControl.Container,
                     Valid = true
                 };
 
                 // compare upper case type
-                if (_controlList.ContainsKey(oSourceControl.Type.ToUpper()))
+                if (_controlList.ContainsKey(sourceControl.Type.ToUpper()))
                 {
-                    ControlListItem oItem = (ControlListItem)_controlList[oSourceControl.Type.ToUpper()];
+                    ControlListItem oItem = (ControlListItem)_controlList[sourceControl.Type.ToUpper()];
 
                     if (oItem.Unsupported)
                     {
                         Type = "Unsuported";
-                        oTargetControl.Valid = false;
+                        targetControl.Valid = false;
                     }
                     else
                     {
                         Type = oItem.CsharpName;
                         if (Type == "MenuItem")
-                            oModule.MenuUsed = true;
+                            module.MenuUsed = true;
                     }
-                    oTargetControl.InvisibleAtRuntime = oItem.InvisibleAtRuntime;
+                    targetControl.InvisibleAtRuntime = oItem.InvisibleAtRuntime;
                 }
                 else
-                    Type = oSourceControl.Type;
+                    Type = sourceControl.Type;
 
-                oTargetControl.Type = Type;
-                ParseControlProperties(oModule, oTargetControl, oSourceControl.PropertyList, oTargetControl.PropertyList);
+                targetControl.Type = Type;
+                ParseControlProperties(module, targetControl, sourceControl.PropertyList, targetControl.PropertyList);
 
-                targetControlList.Add(oTargetControl);
+                targetControlList.Add(targetControl);
             }
             return true;
         }
 
-        public Boolean ParseModuleProperties(Module oModule, ArrayList sourcePropertyList, ArrayList targetPropertyList)
+        public Boolean ParseModuleProperties(Module module, List<ControlProperty> sourcePropertyList, List<ControlProperty> targetPropertyList)
         {
             ControlProperty TargetProperty = null;
 
@@ -301,10 +302,10 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             foreach (ControlProperty SourceProperty in sourcePropertyList)
             {
                 TargetProperty = new ControlProperty();
-                if (ParseProperties(oModule.Type, SourceProperty, TargetProperty, sourcePropertyList))
+                if (ParseProperties(module.Type, SourceProperty, TargetProperty, sourcePropertyList))
                 {
                     if (TargetProperty.Name == "BackgroundImage" || TargetProperty.Name == "Icon")
-                        oModule.ImagesUsed = true;
+                        module.ImagesUsed = true;
                     targetPropertyList.Add(TargetProperty);
                 }
             }
@@ -313,12 +314,12 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         public Boolean ParseEnums(Module sourceModule, Module targetModule)
         {
-            foreach (Enum SourceEnum in sourceModule.EnumList)
+            foreach (EnumType SourceEnum in sourceModule.EnumList)
                 targetModule.EnumList.Add(SourceEnum);
             return true;
         }
 
-        public Boolean ParseVariables(ArrayList sourceVariableList, ArrayList targetVariableList)
+        public Boolean ParseVariables(List<Variable> sourceVariableList, List<Variable> targetVariableList)
         {
             Variable TargetVariable = null;
 
@@ -572,9 +573,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         }
 
 
-        public Boolean ParseControlProperties(Module module, ControlType control,
-                                                    ArrayList sourcePropertyList,
-                                                    ArrayList targetPropertyList)
+        public Boolean ParseControlProperties(Module module, ControlType control, List<ControlProperty> sourcePropertyList, List<ControlProperty> targetPropertyList)
         {
             ControlProperty TargetProperty = null;
 
@@ -596,15 +595,9 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             return true;
         }
 
-        public Boolean ParseProperties(String type,
-                                            ControlProperty sourceProperty,
-                                            ControlProperty targetProperty,
-                                            ArrayList sourcePropertyList)
+        public Boolean ParseProperties(String type, ControlProperty sourceProperty, ControlProperty targetProperty, List<ControlProperty> sourcePropertyList)
         {
-
-            Boolean ValidProperty = false;
-
-            ValidProperty = true;
+            Boolean validProperty = true;
 
             targetProperty.Valid = true;
 
@@ -621,7 +614,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 case "Mask":              // maskedit
                 case "PromptChar":        // maskedit
 
-                    ValidProperty = false;
+                    validProperty = false;
                     break;
 
                 // begin common properties
@@ -655,7 +648,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         targetProperty.Value = GetColor(sourceProperty.Value);
                     }
                     else
-                        ValidProperty = false;
+                        validProperty = false;
                     break;
 
                 case "BorderStyle":
@@ -735,12 +728,12 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         targetProperty.Value = "new System.Drawing.Point(" + GetLocation(sourcePropertyList) + ")";
                     }
                     else
-                        ValidProperty = false;
+                        validProperty = false;
                     break;
                 case "Top":
                 case "Width":
                     // nothing, already processed by Height, Left
-                    ValidProperty = false;
+                    validProperty = false;
                     break;
 
                 case "Enabled":
@@ -759,7 +752,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         targetProperty.Value = GetBool(sourceProperty.Value);
                     }
                     else
-                        ValidProperty = false;
+                        validProperty = false;
                     break;
 
                 case "Font":
@@ -852,7 +845,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         targetProperty.Value = sourceProperty.Value;
                     }
                     else
-                        ValidProperty = false;
+                        validProperty = false;
                     break;
 
                 // -1 converted to true
@@ -865,7 +858,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         targetProperty.Value = GetBool(sourceProperty.Value);
                     }
                     else
-                        ValidProperty = false;
+                        validProperty = false;
                     break;
 
                 case "Icon":
@@ -960,7 +953,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 case "_ExtentY":
                 case "_Version":
                 case "OLEDropMode":
-                    ValidProperty = false;
+                    validProperty = false;
                     break;
 
                 // this.listView.View = System.Windows.Forms.View.List;
@@ -997,7 +990,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 case "ClipControls":
                 case "LockControls":
                 case "FillStyle":
-                    ValidProperty = false;
+                    validProperty = false;
                     break;
 
                 // supported properties  
@@ -1015,12 +1008,12 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                 case "ClientWidth":
                     // nothing, already processed by Height, Left
-                    ValidProperty = false;
+                    validProperty = false;
                     break;
 
                 case "ClientLeft":
                 case "ClientTop":
-                    ValidProperty = false;
+                    validProperty = false;
                     break;
 
                 case "MaxButton":
@@ -1097,7 +1090,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     targetProperty.Valid = false;
                     break;
             }
-            return ValidProperty;
+            return validProperty;
 
         }
 
@@ -1235,7 +1228,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 return "true";
         }
 
-        private String GetSize(String height, String width, ArrayList propertyList)
+        private String GetSize(String height, String width, List<ControlProperty> propertyList)
         {
             Int32 HeightValue = 0;
             Int32 WidthValue = 0;
@@ -1252,7 +1245,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             return WidthValue.ToString() + ", " + HeightValue.ToString();
         }
 
-        private String GetLocation(ArrayList propertyList)
+        private String GetLocation(List<ControlProperty> propertyList)
         {
             Int32 Left = 0;
             Int32 Top = 0;

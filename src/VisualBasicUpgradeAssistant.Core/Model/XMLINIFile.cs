@@ -188,17 +188,17 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             return node.InnerText;
         }
 
-        public String[] GetChildren(String aNodeName)
+        public String[] GetChildren(String nodeName)
         {
             XmlNode node;
             String[] result = new String[0];
 
             // Select the root if the Node is empty
-            if (aNodeName == "")
+            if (nodeName == "")
                 node = _doc.DocumentElement;
             else
                 // Select the node given
-                node = _doc.DocumentElement.SelectSingleNode(aNodeName);
+                node = _doc.DocumentElement.SelectSingleNode(nodeName);
 
             // exit with an empty collection if nothing here
             if (node == null)

@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace VisualBasicUpgradeAssistant.Core.DataClasses
 {
@@ -14,49 +16,23 @@ namespace VisualBasicUpgradeAssistant.Core.DataClasses
         public String FileName { get; set; }
         public Boolean ImagesUsed { get; set; } = false;
         public Boolean MenuUsed { get; set; } = false;
-
+        public List<String> ImageList { get; set; }
+        public List<ControlType> ControlList { get; set; }
+        public List<ControlProperty> FormPropertyList { get; set; }
+        public List<Variable> VariableList { get; set; }
+        public List<Property> PropertyList { get; set; }
+        public List<Procedure> ProcedureList { get; set; }
+        public List<EnumType> EnumList { get; set; }
         public Module()
         {
-            FormPropertyList = new ArrayList();
-            ControlList = new ArrayList();
-            ImageList = new ArrayList();
-            VariableList = new ArrayList();
-            PropertyList = new ArrayList();
-            ProcedureList = new ArrayList();
-            EnumList = new ArrayList();
+            FormPropertyList = new List<ControlProperty>();
+            ControlList = new List<ControlType>();
+            ImageList = new List<String>();
+            VariableList = new List<Variable>();
+            PropertyList = new List<Property>();
+            ProcedureList = new List<Procedure>();
+            EnumList = new List<EnumType>();
         }
 
-        public ArrayList ImageList { get; set; }
-        public ArrayList ControlList { get; set; }
-        public ArrayList FormPropertyList { get; set; }
-        public ArrayList VariableList { get; set; }
-        public ArrayList PropertyList { get; set; }
-        public ArrayList ProcedureList { get; set; }
-        public ArrayList EnumList { get; set; }
-
-        public void FormPropertyAdd(ControlProperty oProperty)
-        {
-            FormPropertyList.Add(oProperty);
-        }
-
-        public void ControlAdd(ControlType oControl)
-        {
-            ControlList.Add(oControl);
-        }
-
-        public void VariableAdd(Variable oVariable)
-        {
-            VariableList.Add(oVariable);
-        }
-
-        public void PropertyAdd(Property oProperty)
-        {
-            PropertyList.Add(oProperty);
-        }
-
-        public void ProcedureAdd(Procedure oProcedure)
-        {
-            ProcedureList.Add(oProcedure);
-        }
     }
 }
