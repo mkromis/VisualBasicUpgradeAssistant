@@ -14,4 +14,8 @@
     <ProjectReference Include="..\VisualBasicUpgradeAssistant.Core\VisualBasicUpgradeAssistant.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
 </Project>
