@@ -40,7 +40,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 return defaultValue;
             if (key == "")
                 return defaultValue;
-            result = getKeyValue(section, key, defaultValue.ToString());
+            result = GetKeyValue(section, key, defaultValue.ToString());
 
             return result.ToLower() == "true";
         }
@@ -56,7 +56,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 return defaultValue;
             if (key == "")
                 return defaultValue;
-            result = getKeyValue(section, key, defaultValue.ToString());
+            result = GetKeyValue(section, key, defaultValue.ToString());
             return Int32.Parse(result);
         }
 
@@ -69,7 +69,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 return defaultValue;
             if (key == "")
                 return defaultValue;
-            return getKeyValue(section, key, defaultValue);
+            return GetKeyValue(section, key, defaultValue);
         }
 
         // **********************************************************************************
@@ -179,7 +179,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             return result;
         }
 
-        private String getKeyValue(String section, String key, String defaultValue)
+        private String GetKeyValue(String section, String key, String defaultValue)
         {
             XmlNode node;
             node = _doc.DocumentElement.SelectSingleNode("/configuration/" + section + "/" + key);
