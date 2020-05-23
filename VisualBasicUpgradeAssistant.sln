@@ -7,11 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualBasicUpgradeAssistant
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualBasicUpgradeAssistant.Core.Test", "test\VisualBasicUpgradeAssistant.Core.Test\VisualBasicUpgradeAssistant.Core.Test.csproj", "{84394ABA-C4F7-4C48-8887-87FB5D634CF2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "!Solution Items", "!Solution Items", "{BEB28A26-B564-474E-8D9A-842A261BF73B}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualBasicUpgradeAssistant.Wpf", "src\VisualBasicUpgradeAssistant.Wpf\VisualBasicUpgradeAssistant.Wpf.csproj", "{2C32F1C1-C9B8-4E7E-9B0C-DEF5F7450C5C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{C09EFDA0-ECD7-4141-8E73-E487208D0553}"
@@ -19,6 +14,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualBasicUpgradeAssistant.WinForms", "src\VisualBasicUpgradeAssistant.WinForms\VisualBasicUpgradeAssistant.WinForms.csproj", "{5DF3B5DF-E24D-4FBF-9181-C6A674D38915}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9833BA7B-D1F7-4418-B03D-CC85089D80C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D9424C5B-7336-4538-9646-8F68B701807D}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
