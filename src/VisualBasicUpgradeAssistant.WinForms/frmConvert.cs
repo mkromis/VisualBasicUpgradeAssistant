@@ -14,51 +14,52 @@ namespace VB2C
     /// Summary description for Form1.
     /// </summary>
     public class FrmConvert : System.Windows.Forms.Form
-	{
-    private System.Windows.Forms.TextBox txtVB6;
-    private System.Windows.Forms.Button cmdLoad;
-    private System.Windows.Forms.Button cmdConvert;
-    private System.Windows.Forms.Button cmdExit;
-    private System.Windows.Forms.TextBox txtCSharp;
-    private System.Windows.Forms.Label label;
-    private System.Windows.Forms.TextBox txtOutPath;
-    private System.Windows.Forms.Label label1;
-    private System.ComponentModel.IContainer components = null;
-	  
-		public FrmConvert()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+    {
+        private System.Windows.Forms.TextBox txtVB6;
+        private System.Windows.Forms.Button cmdLoad;
+        private System.Windows.Forms.Button cmdConvert;
+        private System.Windows.Forms.Button cmdExit;
+        private System.Windows.Forms.TextBox txtCSharp;
+        private System.Windows.Forms.Label label;
+        private System.Windows.Forms.TextBox txtOutPath;
+        private System.Windows.Forms.Label label1;
+        private System.ComponentModel.IContainer components = null;
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+        public FrmConvert()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if (components != null) 
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-					
-		private void InitializeComponent() {
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmConvert));
             this.cmdExit = new System.Windows.Forms.Button();
             this.label = new System.Windows.Forms.Label();
@@ -185,110 +186,111 @@ namespace VB2C
             this.ResumeLayout(false);
             this.PerformLayout();
 
-    }
-		#endregion
-
-    private string mFileName = null;
-    private string mOutPath = null;
-
-    private void cmdExit_Click(object sender, System.EventArgs e)
-    {
-      Close();
-    }
-
-    private void cmdLoad_Click(object sender, System.EventArgs e)
-    {
-      mFileName = FileOpen();
-      if (mFileName != null)
-      {
-        // show content of file
-        StreamReader Reader = System.IO.File.OpenText(mFileName);	
-        txtVB6.Text = Reader.ReadToEnd();
-        Reader.Close();
-      }
-    }
-
-    private string FileOpen()
-    {
-      string sFilter = "VB6 form (*.frm)|*.frm|VB6 module (*.bas)|*.bas|VB6 class (*.cls)|*.cls|All files (*.*)|*.*" ;	
-      string sResult = null;
-
-      OpenFileDialog oDialog = new OpenFileDialog();		
-      oDialog.Filter = sFilter;
-      if(oDialog.ShowDialog() != DialogResult.Cancel)	
-      {		
-        sResult = oDialog.FileName;
-      }	
-      return sResult;
-    }
-
-    private void frmConvert_Resize(object sender, System.EventArgs e)
-    {
-    //-16
-      txtVB6.Top = 8;
-      txtVB6.Left = 8;
-      txtVB6.Height = this.Height / 2 - 60;
-      txtVB6.Width = this.Width - 24;
-      
-      txtCSharp.Left = 8;
-      txtCSharp.Top = this.Height / 2 - 16;
-      txtCSharp.Height = this.Height / 2 - 60;
-      txtCSharp.Width = this.Width - 24;
-    }
-
-    private void cmdConvert_Click(object sender, System.EventArgs e)
-    {     
-       if (mFileName.Trim() != String.Empty)
-       {
-        // parse file
-        ConvertCode ConvertObject = new ConvertCode();
-        if ( txtOutPath.Text.Trim() == String.Empty)
-        {
-          MessageBox.Show("Fill out path !", "", MessageBoxButtons.OK ,MessageBoxIcon.Error);  
-          return;
         }
-        if ( !Directory.Exists(txtOutPath.Text.Trim()))
+        #endregion
+
+        private string mFileName = null;
+        private string mOutPath = null;
+
+        private void cmdExit_Click(object sender, System.EventArgs e)
         {
-          MessageBox.Show("Out path not exists !", "", MessageBoxButtons.OK ,MessageBoxIcon.Error);  
-          return;
+            Close();
         }
 
-        mOutPath = txtOutPath.Text;
-        if (mOutPath.Substring(mOutPath.Length - 1, 1) != @"\")
+        private void cmdLoad_Click(object sender, System.EventArgs e)
         {
-          mOutPath = mOutPath + @"\";
-        }		
-        ConvertObject.ParseFile(mFileName, mOutPath);
+            mFileName = FileOpen();
+            if (mFileName != null)
+            {
+                // show content of file
+                StreamReader Reader = System.IO.File.OpenText(mFileName);
+                txtVB6.Text = Reader.ReadToEnd();
+                Reader.Close();
+            }
+        }
 
-        // show result
-        txtCSharp.Text = ConvertObject.OutSourceCode;
-       }
+        private string FileOpen()
+        {
+            string sFilter = "VB6 form (*.frm)|*.frm|VB6 module (*.bas)|*.bas|VB6 class (*.cls)|*.cls|All files (*.*)|*.*";
+            string sResult = null;
+
+            OpenFileDialog oDialog = new OpenFileDialog();
+            oDialog.Filter = sFilter;
+            if (oDialog.ShowDialog() != DialogResult.Cancel)
+            {
+                sResult = oDialog.FileName;
+            }
+            return sResult;
+        }
+
+        private void frmConvert_Resize(object sender, System.EventArgs e)
+        {
+            //-16
+            txtVB6.Top = 8;
+            txtVB6.Left = 8;
+            txtVB6.Height = this.Height / 2 - 60;
+            txtVB6.Width = this.Width - 24;
+
+            txtCSharp.Left = 8;
+            txtCSharp.Top = this.Height / 2 - 16;
+            txtCSharp.Height = this.Height / 2 - 60;
+            txtCSharp.Width = this.Width - 24;
+        }
+
+        private void cmdConvert_Click(object sender, System.EventArgs e)
+        {
+            if (mFileName.Trim() != String.Empty)
+            {
+                // parse file
+                ConvertCode ConvertObject = new ConvertCode();
+                if (txtOutPath.Text.Trim() == String.Empty)
+                {
+                    MessageBox.Show("Fill out path !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                if (!Directory.Exists(txtOutPath.Text.Trim()))
+                {
+                    MessageBox.Show("Out path not exists !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                mOutPath = txtOutPath.Text;
+                if (mOutPath.Substring(mOutPath.Length - 1, 1) != @"\")
+                {
+                    mOutPath = mOutPath + @"\";
+                }
+                ConvertObject.ParseFile(mFileName, mOutPath);
+
+                // show result
+                txtCSharp.Text = ConvertObject.OutSourceCode;
+            }
+        }
+
+        private void frmConvert_Load(object sender, System.EventArgs e)
+        {
+            txtOutPath.Text = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        }
+
+        private void frmConvert_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // Don't write out to program directory
+            //Program.Config.WriteString(Program.CONFIG_SETTING, Program.CONFIG_OUT_PATH, txtOutPath.Text);
+        }
+
+        //    private string FileSave()
+        //    {
+        //      string sFilter = "C# Files (*.cs)|*.cs" ;	
+        //      string sResult = null;
+        //
+        //      SaveFileDialog oDialog = new SaveFileDialog();		
+        //      oDialog.Filter = sFilter;
+        //      if(oDialog.ShowDialog() != DialogResult.Cancel)	
+        //      {		
+        //        sResult = oDialog.FileName;
+        //      }	
+        //      return sResult;
+        //    }
+
+
     }
-
-    private void frmConvert_Load(object sender, System.EventArgs e)
-    {
-      txtOutPath.Text = Program.Config.ReadString(Program.CONFIG_SETTING, Program.CONFIG_OUT_PATH, "");
-    }
-
-    private void frmConvert_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-    {
-      Program.Config.WriteString(Program.CONFIG_SETTING, Program.CONFIG_OUT_PATH, txtOutPath.Text);
-    }
-
-//    private string FileSave()
-//    {
-//      string sFilter = "C# Files (*.cs)|*.cs" ;	
-//      string sResult = null;
-//
-//      SaveFileDialog oDialog = new SaveFileDialog();		
-//      oDialog.Filter = sFilter;
-//      if(oDialog.ShowDialog() != DialogResult.Cancel)	
-//      {		
-//        sResult = oDialog.FileName;
-//      }	
-//      return sResult;
-//    }
-
-
-	}
 }
