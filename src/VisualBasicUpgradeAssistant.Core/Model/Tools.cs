@@ -1142,7 +1142,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             else
                 targetProperty.Value = targetProperty.Value + " ( " + Temp + " ),";
             targetProperty.Value = targetProperty.Value + " System.Drawing.GraphicsUnit.Point, ";
-            targetProperty.Value = targetProperty.Value + "((System.Byte)(" + FontCharSet.ToString() + ")));";
+            targetProperty.Value = targetProperty.Value + "((System.Byte)(" + FontCharSet.ToString() + ")))";
         }
 
         private Int32 GetFontSizeInt(String value)
