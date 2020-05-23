@@ -3,8 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Text;
-using System.Xml;
+using System.Linq;
 using VisualBasicUpgradeAssistant.Core.DataClasses;
 
 namespace VisualBasicUpgradeAssistant.Core.Model
@@ -14,76 +13,34 @@ namespace VisualBasicUpgradeAssistant.Core.Model
     /// </summary>
     public class Tools
     {
-        private Hashtable _controlList;
+        private Dictionary<String, Controltem>? _controlList;
 
+        /// <summary>
+        /// Load the control from resource file
+        /// </summary>
         private void ControlListLoad()
         {
-            _controlList = new Hashtable();
-            XmlDocument Doc = new XmlDocument();
-            XmlNode node;
-            ControlListItem oItem;
+            // get executable directory
+            String? binPath = AppDomain.CurrentDomain.BaseDirectory;
 
-            // get current directory
-            String[] CommandLineArgs;
-            CommandLineArgs = Environment.GetCommandLineArgs();
-            // index 0 contain path and name of exe file
-            String BinPath = Path.GetDirectoryName(CommandLineArgs[0].ToLower());
-            String FileName = BinPath + @"\vb2c.xml";
-
-            Doc.Load(FileName);
-            // Select the node given
-            node = Doc.DocumentElement.SelectSingleNode("/configuration/ControlList");
-            // exit with an empty collection if nothing here
-            if (node == null)
-                return;             // exit with an empty colection if the node has no children
-            if (node.HasChildNodes == false)
-                return;             // get the nodelist of all children
-            XmlNodeList nodeList = node.ChildNodes;
-
-            foreach (XmlElement element in nodeList)
+            // Saftey check, should never be null
+            if (String.IsNullOrEmpty(binPath))
             {
-                oItem = new ControlListItem
-                {
-                    VB6Name = String.Empty,
-                    CsharpName = String.Empty,
-                    Unsupported = false,
-                    InvisibleAtRuntime = false
-                };
-                foreach (XmlElement childElement in element)
-                    switch (childElement.Name)
-                    {
-                        case "VB6":
-                            // compare in uppercase
-                            oItem.VB6Name = childElement.InnerText.ToUpper();
-                            break;
-                        case "Csharp":
-                            oItem.CsharpName = childElement.InnerText;
-                            break;
-                        case "Unsupported":
-                            oItem.Unsupported = Boolean.Parse(childElement.InnerText);
-                            break;
-                        case "InvisibleAtRuntime":
-                            oItem.InvisibleAtRuntime = Boolean.Parse(childElement.InnerText);
-                            break;
-                    }
-                _controlList.Add(oItem.VB6Name, oItem);
+                throw new DirectoryNotFoundException("Bad path");
             }
 
-
-            //      private string getKeyValue(string aSection, string aKey, string aDefaultValue)
-            //      {
-            //        XmlNode node;
-            //        node = (Doc.DocumentElement).SelectSingleNode("/configuration/" + aSection + "/" + aKey);
-            //        if (node == null) {return aDefaultValue;}
-            //        return node.InnerText;
-            //      }
-
+            // Read the control list and convert to resource
+            String jsonPath = Path.Combine(binPath, "Resources", "ControlList.json");
+            ControlList controlList = ControlList.ReadData(new FileInfo(jsonPath));
+            _controlList = controlList.Controls.ToDictionary(x => x.VB6);
         }
 
         public Boolean ParseModule(Module sourceModule, Module targetModule)
         {
-
-            ControlListLoad();
+            if (_controlList == null)
+            {
+                ControlListLoad();
+            }
 
             // module name
             targetModule.Name = sourceModule.Name;
@@ -102,7 +59,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             if (targetModule.MenuUsed)
             {
                 // add main menu control
-                ControlType oControl = new ControlType
+                ControlType control = new ControlType
                 {
                     Name = "MainMenu",
                     Owner = targetModule.Name,
@@ -110,11 +67,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     Valid = true,
                     InvisibleAtRuntime = true
                 };
-                targetModule.ControlList.Insert(0, oControl);
+                targetModule.ControlList.Insert(0, control);
                 foreach (ControlType oMenuControl in targetModule.ControlList)
                     if (oMenuControl.Type == "MenuItem" && oMenuControl.Owner == targetModule.Name)
                         // rewrite previous owner
-                        oMenuControl.Owner = oControl.Name;
+                        oMenuControl.Owner = control.Name;
             }
 
             ArrayList TempControlList = new ArrayList();
@@ -268,20 +225,20 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 // compare upper case type
                 if (_controlList.ContainsKey(sourceControl.Type.ToUpper()))
                 {
-                    ControlListItem oItem = (ControlListItem)_controlList[sourceControl.Type.ToUpper()];
+                    Controltem item = (Controltem)_controlList[sourceControl.Type.ToUpper()];
 
-                    if (oItem.Unsupported)
+                    if (item.Unsupported)
                     {
                         Type = "Unsuported";
                         targetControl.Valid = false;
                     }
                     else
                     {
-                        Type = oItem.CsharpName;
+                        Type = item.CSharp;
                         if (Type == "MenuItem")
                             module.MenuUsed = true;
                     }
-                    targetControl.InvisibleAtRuntime = oItem.InvisibleAtRuntime;
+                    targetControl.InvisibleAtRuntime = item.InvisibleAtRuntime;
                 }
                 else
                     Type = sourceControl.Type;
@@ -1185,7 +1142,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             else
                 targetProperty.Value = targetProperty.Value + " ( " + Temp + " ),";
             targetProperty.Value = targetProperty.Value + " System.Drawing.GraphicsUnit.Point, ";
-            targetProperty.Value = targetProperty.Value + "((System.Byte)(" + FontCharSet.ToString() + ")));";
+            targetProperty.Value = targetProperty.Value + "((System.Byte)(" + FontCharSet.ToString() + ")))";
         }
 
         private Int32 GetFontSizeInt(String value)
