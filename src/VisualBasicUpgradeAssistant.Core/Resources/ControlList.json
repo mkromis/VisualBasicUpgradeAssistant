@@ -1,0 +1,159 @@
+{
+  "Controls": [
+    {
+      "VB6": "Soft_Button.SoftBttn",
+      "Csharp": "Button"
+    },
+    {
+      "VB6": "SoftButton.SoftBttn",
+      "Csharp": "Button"
+    },
+    {
+      "VB6": "OMEGA_Button.Button",
+      "Csharp": "Button"
+    },
+    {
+      "VB6": "ECRTouchButtonX.EcrButtonX",
+      "Csharp": "Button"
+    },
+    {
+      "VB6": "VB.CommandButton",
+      "Csharp": "Button"
+    },
+    {
+      "VB6": "VB.Menu",
+      "Csharp": "MenuItem"
+    },
+    {
+      "VB6": "VB.Label",
+      "Csharp": "Label"
+    },
+    {
+      "VB6": "VB.TextBox",
+      "Csharp": "TextBox"
+    },
+    {
+      "VB6": "MSMask.MaskEdBox",
+      "Csharp": "TextBox"
+    },
+    {
+      "VB6": "VB.ListBox",
+      "Csharp": "ListBox"
+    },
+    {
+      "VB6": "VB.ComboBox",
+      "Csharp": "ComboBox"
+    },
+    {
+      "VB6": "VB.PictureBox",
+      "Csharp": "PictureBox"
+    },
+    {
+      "VB6": "VB.Image",
+      "Csharp": "PictureBox"
+    },
+    {
+      "VB6": "VB.Frame",
+      "Csharp": "GroupBox"
+    },
+    {
+      "VB6": "VB.OptionButton",
+      "Csharp": "RadioButton"
+    },
+    {
+      "VB6": "VB.CheckBox",
+      "Csharp": "CheckBox"
+    },
+    {
+      "VB6": "VB.Timer",
+      "Csharp": "Timer",
+      "InvisibleAtRuntime": "True"
+    },
+    {
+      "VB6": "MSFlexGridLib.MSFlexGrid",
+      "Csharp": "DataGrid"
+    },
+    {
+      "VB6": "MSDataGridLib.DataGrid",
+      "Csharp": "DataGrid"
+    },
+    {
+      "VB6": "TrueDBGrid60.TDBGrid",
+      "Csharp": "DataGrid"
+    },
+    {
+      "VB6": "MSComctlLib.StatusBar",
+      "Csharp": "StatusBar"
+    },
+    {
+      "VB6": "MSComctlLib.ListView",
+      "Csharp": "ListView"
+    },
+    {
+      "VB6": "MSComCtl2.UpDown",
+      "Csharp": "NumericUpDown"
+    },
+    {
+      "VB6": "MSComctlLib.TabStrip",
+      "Csharp": "TabControl"
+    },
+    {
+      "VB6": "TabDlg.SSTab",
+      "Csharp": "TabControl"
+    },
+    {
+      "VB6": "MSComctlLib.Toolbar",
+      "Csharp": "ToolBar"
+    },
+    {
+      "VB6": "MSComctlLib.ImageList",
+      "Csharp": "ImageList",
+      "InvisibleAtRuntime": "True"
+    },
+    {
+      "VB6": "MSComctlLib.ProgressBar",
+      "Csharp": "ProgressBar"
+    },
+    {
+      "VB6": "MSComDlg.CommonDialog",
+      "Csharp": "OpenFileDialog",
+      "InvisibleAtRuntime": "True"
+    },
+    {
+      "VB6": "RichTextLib.RichTextBox",
+      "Csharp": "RichTextBox"
+    },
+    {
+      "VB6": "ComCtl3.CoolBar",
+      "Unsupported": "True"
+    },
+    {
+      "VB6": "VB.Shape",
+      "Unsupported": "True"
+    },
+    {
+      "VB6": "VB.Line",
+      "Unsupported": "True"
+    },
+    {
+      "VB6": "VB.Data",
+      "Unsupported": "True"
+    },
+    {
+      "VB6": "VB.DriveListBox",
+      "Unsupported": "True"
+    },
+    {
+      "VB6": "VB.DirListBox",
+      "Unsupported": "True"
+    },
+    {
+      "VB6": "VB.FileListBox",
+      "Unsupported": "True"
+    },
+    {
+      "VB6": "VistoSideBar.SideBar",
+      "Unsupported": "True"
+    }
+  ]
+}
