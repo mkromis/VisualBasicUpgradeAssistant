@@ -13,7 +13,12 @@
     <DockPanel>
         <ribbon:Ribbon DockPanel.Dock="Top">
             <ribbon:RibbonTabItem Header="Home">
-                <ribbon:RibbonGroupBox Header="Test" />
+                <ribbon:RibbonGroupBox Header="Test">
+                    <ribbon:Button 
+                        Header="Load..." 
+                        Command="{Binding OpenOmegaCommand}"
+                        LargeIcon="/Resources/OMEGA.png" />
+                </ribbon:RibbonGroupBox>
             </ribbon:RibbonTabItem>
         </ribbon:Ribbon>
         <mes:MesStatusBarView DockPanel.Dock="Bottom" />

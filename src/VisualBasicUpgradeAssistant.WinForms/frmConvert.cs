@@ -197,73 +197,9 @@ namespace VB2C
             Close();
         }
 
-        private void cmdLoad_Click(object sender, System.EventArgs e)
-        {
-            mFileName = FileOpen();
-            if (mFileName != null)
-            {
-                // show content of file
-                StreamReader Reader = System.IO.File.OpenText(mFileName);
-                txtVB6.Text = Reader.ReadToEnd();
-                Reader.Close();
-            }
-        }
-
-        private string FileOpen()
-        {
-            string sFilter = "VB6 form (*.frm)|*.frm|VB6 module (*.bas)|*.bas|VB6 class (*.cls)|*.cls|All files (*.*)|*.*";
-            string sResult = null;
-
-            OpenFileDialog oDialog = new OpenFileDialog();
-            oDialog.Filter = sFilter;
-            if (oDialog.ShowDialog() != DialogResult.Cancel)
-            {
-                sResult = oDialog.FileName;
-            }
-            return sResult;
-        }
-
-        private void frmConvert_Resize(object sender, System.EventArgs e)
-        {
-            //-16
-            txtVB6.Top = 8;
-            txtVB6.Left = 8;
-            txtVB6.Height = this.Height / 2 - 60;
-            txtVB6.Width = this.Width - 24;
-
-            txtCSharp.Left = 8;
-            txtCSharp.Top = this.Height / 2 - 16;
-            txtCSharp.Height = this.Height / 2 - 60;
-            txtCSharp.Width = this.Width - 24;
-        }
-
         private void cmdConvert_Click(object sender, System.EventArgs e)
         {
-            if (mFileName.Trim() != String.Empty)
-            {
-                // parse file
-                ConvertCode ConvertObject = new ConvertCode();
-                if (txtOutPath.Text.Trim() == String.Empty)
-                {
-                    MessageBox.Show("Fill out path !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                if (!Directory.Exists(txtOutPath.Text.Trim()))
-                {
-                    MessageBox.Show("Out path not exists !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
 
-                mOutPath = txtOutPath.Text;
-                if (mOutPath.Substring(mOutPath.Length - 1, 1) != @"\")
-                {
-                    mOutPath = mOutPath + @"\";
-                }
-                ConvertObject.ParseFile(mFileName, mOutPath);
-
-                // show result
-                txtCSharp.Text = ConvertObject.OutSourceCode;
-            }
         }
 
         private void frmConvert_Load(object sender, System.EventArgs e)
