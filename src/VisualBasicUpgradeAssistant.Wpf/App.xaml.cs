@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using MinoriEditorShell.Platforms.Wpf;
 using MvvmCross.Core;
 using MvvmCross.Platforms.Wpf.Core;
 using MvvmCross.Platforms.Wpf.Views;
@@ -18,7 +19,7 @@ namespace VisualBasicUpgradeAssistant.Wpf
     {
         protected override void RegisterSetup()
         {
-            this.RegisterSetupType<MvxWpfSetup<Core.App>>();
+            this.RegisterSetupType<MesWpfSetup<Core.App>>();
         }
     }
 }

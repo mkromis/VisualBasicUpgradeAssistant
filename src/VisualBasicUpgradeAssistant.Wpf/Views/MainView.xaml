@@ -5,10 +5,23 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:VisualBasicUpgradeAssistant.Wpf.Views"
+    xmlns:ribbon="urn:fluent-ribbon"
+    xmlns:mes="clr-namespace:MinoriEditorShell.Platforms.Wpf.Views;assembly=MinoriEditorShell.Platforms.Wpf"
     xmlns:mvx="clr-namespace:MvvmCross.Platforms.Wpf.Views;assembly=MvvmCross.Platforms.Wpf"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+    <DockPanel>
+        <ribbon:Ribbon DockPanel.Dock="Top">
+            <ribbon:RibbonTabItem Header="Home">
+                <ribbon:RibbonGroupBox Header="Test">
+                    <ribbon:Button 
+                        Header="Load..." 
+                        Command="{Binding OpenOmegaCommand}"
+                        LargeIcon="/Resources/OMEGA.png" />
+                </ribbon:RibbonGroupBox>
+            </ribbon:RibbonTabItem>
+        </ribbon:Ribbon>
+        <mes:MesStatusBarView DockPanel.Dock="Bottom" />
+        <mes:MesDocumentManagerView />
+    </DockPanel>
 </mvx:MvxWpfView>

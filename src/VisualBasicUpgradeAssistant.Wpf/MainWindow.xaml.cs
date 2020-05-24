@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MinoriEditorShell.Ribbon.Platforms.Wpf.Views;
 using MvvmCross.Platforms.Wpf.Views;
 
 namespace VisualBasicUpgradeAssistant.Wpf
@@ -19,7 +20,7 @@ namespace VisualBasicUpgradeAssistant.Wpf
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : MvxWindow
+    public partial class MainWindow : MesRibbonWindow
     {
         public MainWindow()
         {

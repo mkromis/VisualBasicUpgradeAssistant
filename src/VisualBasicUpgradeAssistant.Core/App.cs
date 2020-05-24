@@ -1,3 +1,4 @@
+using MvvmCross;
 using MvvmCross.IoC;
 using MvvmCross.ViewModels;
 using VisualBasicUpgradeAssistant.Core.ViewModels;
@@ -12,6 +13,12 @@ namespace VisualBasicUpgradeAssistant.Core
                 .EndingWith("Service")
                 .AsInterfaces()
                 .RegisterAsLazySingleton();
+
+            //Mvx.IoCProvider.RegisterType<OmegaViewModel>();
+            CreatableTypes()
+                .EndingWith("ViewModel")
+                .AsTypes()
+                .RegisterAsDynamic();
 
             RegisterAppStart<MainViewModel>();
         }

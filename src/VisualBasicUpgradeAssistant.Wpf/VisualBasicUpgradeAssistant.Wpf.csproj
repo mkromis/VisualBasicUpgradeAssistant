@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\OMEGA.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinoriEditorShell.Ribbon" Version="0.3.0-alpha.87" />
     <PackageReference Include="MvvmCross.Platforms.Wpf" Version="6.4.2" />
   </ItemGroup>
 
@@ -16,6 +21,12 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\OMEGA.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

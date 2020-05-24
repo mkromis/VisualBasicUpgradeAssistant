@@ -6,6 +6,7 @@
     xmlns:mvx="clr-namespace:MvvmCross.Platforms.Wpf.Views;assembly=MvvmCross.Platforms.Wpf"
     StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- Attach default Theme -->
+        <ResourceDictionary Source="pack://application:,,,/Fluent;Component/Themes/Generic.xaml" />
     </Application.Resources>
 </mvx:MvxApplication>
