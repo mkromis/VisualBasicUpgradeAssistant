@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="MinoriEditorShell.Ribbon" Version="0.3.0-alpha.87" />
     <PackageReference Include="MvvmCross.Platforms.Wpf" Version="6.4.2" />
+    <PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>
