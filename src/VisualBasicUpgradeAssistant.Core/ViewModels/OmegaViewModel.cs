@@ -1,11 +1,11 @@
 using System;
 using System.IO;
-using System.Windows.Forms;
+using System.Windows;
+using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using MinoriEditorShell.Services;
 using MvvmCross;
 using MvvmCross.Commands;
-using MvvmCross.Navigation;
-using MvvmCross.ViewModels;
 using VisualBasicUpgradeAssistant.Core.Model;
 
 namespace VisualBasicUpgradeAssistant.Core.ViewModels
@@ -42,12 +42,12 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
                 ConvertCode ConvertObject = new ConvertCode();
                 if (String.IsNullOrWhiteSpace(OutPath))
                 {
-                    MessageBox.Show("Fill out path !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Fill out path !", "", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 if (!Directory.Exists(OutPath))
                 {
-                    MessageBox.Show("Out path not exists !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Out path not exists !", "", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -65,13 +65,15 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
 
         public IMvxCommand LoadCommand => new MvxCommand(() =>
         {
-            String filter = "VB6 form (*.frm)|*.frm|VB6 module (*.bas)|*.bas|VB6 class (*.cls)|*.cls|All files (*.*)|*.*";
+            //String filter = "VB6 form (*.frm)|*.frm|VB6 module (*.bas)|*.bas|VB6 class (*.cls)|*.cls|All files (*.*)|*.*";
 
-            OpenFileDialog dialog = new OpenFileDialog
-            {
-                Filter = filter
-            };
-            if (dialog.ShowDialog() != DialogResult.Cancel)
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.Filters.Add(new CommonFileDialogFilter("VB6 form (*.frm)", "*.frm"));
+            dialog.Filters.Add(new CommonFileDialogFilter("VB6 module (*.bas)", "*.bas"));
+            dialog.Filters.Add(new CommonFileDialogFilter("VB6 class (*.cls)", "*.cls"));
+            dialog.Filters.Add(new CommonFileDialogFilter("All files (*.*)", "*.*"));
+
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 _fileName = dialog.FileName;
 
@@ -82,6 +84,20 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
                     VB6Text = Reader.ReadToEnd();
                     Reader.Close();
                 }
+            }
+        });
+
+        public IMvxCommand SelectOutPathCommand => new MvxCommand(() =>
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true,
+            };
+
+            CommonFileDialogResult result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok)
+            {
+                OutPath = dialog.FileName;
             }
         });
 

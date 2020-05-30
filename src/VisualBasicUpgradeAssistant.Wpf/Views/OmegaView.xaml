@@ -44,7 +44,9 @@
                 Command="{Binding ConvertCommand}" VerticalAlignment="Center"/>
             <TextBlock Text="Out Path" Margin="3" Grid.Column="2" VerticalAlignment="Center"/>
             <TextBox Text="{Binding OutPath}" Margin="3" Grid.Column="3" VerticalAlignment="Center" />
-            <Button Height="40" Content="Select Path..." Margin="3" Grid.Column="4" VerticalAlignment="Center" />
+            <Button 
+                Height="40" Content="Select Path..." Margin="4,0,2,0" Grid.Column="4" 
+                Command="{Binding SelectOutPathCommand}" VerticalAlignment="Center" />
             <Button 
                 Height="40" Content="Exit" Grid.Column="5" Margin="3" 
                 Command="{Binding ExitCommand}" VerticalAlignment="Center"/>
