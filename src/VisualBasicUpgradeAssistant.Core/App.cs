@@ -1,4 +1,3 @@
-using MvvmCross;
 using MvvmCross.IoC;
 using MvvmCross.ViewModels;
 using VisualBasicUpgradeAssistant.Core.ViewModels;

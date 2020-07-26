@@ -8,19 +8,12 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
 {
     public class MainViewModel : MvxNavigationViewModel
     {
-        private readonly IMesDocumentManager _documentManager;
-        private readonly IMvxNavigationService _navigationService;
-
         public MainViewModel(
-            IMesDocumentManager documentManager,
             IMvxLogProvider logProvider,
             IMesWindow mesWindow,
             IMvxNavigationService navigationService
             ) : base(logProvider, navigationService)
         {
-            _documentManager = documentManager;
-            _navigationService = navigationService;
-
             mesWindow.DisplayName = "Visual Basic Upgrade Assistant (Alpha)";
         }
 

@@ -1,11 +1,10 @@
 using System;
 using System.IO;
-using System.Windows.Forms;
+using System.Windows;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using MinoriEditorShell.Services;
 using MvvmCross;
 using MvvmCross.Commands;
-using MvvmCross.Navigation;
-using MvvmCross.ViewModels;
 using VisualBasicUpgradeAssistant.Core.Model;
 
 namespace VisualBasicUpgradeAssistant.Core.ViewModels
@@ -17,7 +16,8 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
         private String? _outPath;
         private String? _csharpText;
 
-        public String? CSharpText {
+        public String? CSharpText
+        {
             get => _csharpText;
             private set => SetProperty(ref _csharpText, value);
         }
@@ -42,12 +42,12 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
                 ConvertCode ConvertObject = new ConvertCode();
                 if (String.IsNullOrWhiteSpace(OutPath))
                 {
-                    MessageBox.Show("Fill out path !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Fill out path !", "", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
                 if (!Directory.Exists(OutPath))
                 {
-                    MessageBox.Show("Out path not exists !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Out path not exists !", "", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -65,13 +65,15 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
 
         public IMvxCommand LoadCommand => new MvxCommand(() =>
         {
-            String filter = "VB6 form (*.frm)|*.frm|VB6 module (*.bas)|*.bas|VB6 class (*.cls)|*.cls|All files (*.*)|*.*";
+            //String filter = "VB6 form (*.frm)|*.frm|VB6 module (*.bas)|*.bas|VB6 class (*.cls)|*.cls|All files (*.*)|*.*";
 
-            OpenFileDialog dialog = new OpenFileDialog
-            {
-                Filter = filter
-            };
-            if (dialog.ShowDialog() != DialogResult.Cancel)
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.Filters.Add(new CommonFileDialogFilter("VB6 form (*.frm)", "*.frm"));
+            dialog.Filters.Add(new CommonFileDialogFilter("VB6 module (*.bas)", "*.bas"));
+            dialog.Filters.Add(new CommonFileDialogFilter("VB6 class (*.cls)", "*.cls"));
+            dialog.Filters.Add(new CommonFileDialogFilter("All files (*.*)", "*.*"));
+
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 _fileName = dialog.FileName;
 
@@ -85,6 +87,20 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
             }
         });
 
+        public IMvxCommand SelectOutPathCommand => new MvxCommand(() =>
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true,
+            };
+
+            CommonFileDialogResult result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok)
+            {
+                OutPath = dialog.FileName;
+            }
+        });
+
         public IMvxCommand ExitCommand => new MvxCommand(() =>
         {
             // Don't write out to program directory
@@ -94,15 +110,15 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
 
         //    private string FileSave()
         //    {
-        //      string sFilter = "C# Files (*.cs)|*.cs" ;	
+        //      string sFilter = "C# Files (*.cs)|*.cs" ;
         //      string sResult = null;
         //
-        //      SaveFileDialog oDialog = new SaveFileDialog();		
+        //      SaveFileDialog oDialog = new SaveFileDialog();
         //      oDialog.Filter = sFilter;
-        //      if(oDialog.ShowDialog() != DialogResult.Cancel)	
-        //      {		
+        //      if(oDialog.ShowDialog() != DialogResult.Cancel)
+        //      {
         //        sResult = oDialog.FileName;
-        //      }	
+        //      }
         //      return sResult;
         //    }
 
