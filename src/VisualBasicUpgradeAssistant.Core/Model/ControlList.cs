@@ -27,8 +27,10 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         public static ControlList ReadData(FileInfo file)
         {
             // Sanity check
-            if (file is null) throw new ArgumentNullException(nameof(file));
-            if (!file.Exists) throw new FileNotFoundException(nameof(file), file.FullName);
+            if (file is null)
+                throw new ArgumentNullException(nameof(file));
+            if (!file.Exists)
+                throw new FileNotFoundException(nameof(file), file.FullName);
 
             String json = File.ReadAllText(file.FullName);
             return JsonConvert.DeserializeObject<ControlList>(json);
