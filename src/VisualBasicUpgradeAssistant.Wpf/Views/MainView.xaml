@@ -1,9 +1,9 @@
-﻿<mvx:MvxWpfView 
+﻿<mvx:MvxWpfView
     x:Class="VisualBasicUpgradeAssistant.Wpf.Views.MainView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:VisualBasicUpgradeAssistant.Wpf.Views"
     xmlns:ribbon="urn:fluent-ribbon"
     xmlns:mes="clr-namespace:MinoriEditorShell.Platforms.Wpf.Views;assembly=MinoriEditorShell.Platforms.Wpf"
@@ -14,8 +14,8 @@
         <ribbon:Ribbon DockPanel.Dock="Top">
             <ribbon:RibbonTabItem Header="Home">
                 <ribbon:RibbonGroupBox Header="Test">
-                    <ribbon:Button 
-                        Header="Load..." 
+                    <ribbon:Button
+                        Header="Load..."
                         Command="{Binding OpenOmegaCommand}"
                         LargeIcon="/Resources/OMEGA.png" />
                 </ribbon:RibbonGroupBox>

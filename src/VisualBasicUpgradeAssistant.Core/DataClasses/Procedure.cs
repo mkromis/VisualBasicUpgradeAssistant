@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace VisualBasicUpgradeAssistant.Core.DataClasses
@@ -16,7 +15,6 @@ namespace VisualBasicUpgradeAssistant.Core.DataClasses
     /// </summary>
     public class Procedure
     {
-
         public String Name { get; set; }
         public String Comment { get; set; }
         public String Scope { get; set; }

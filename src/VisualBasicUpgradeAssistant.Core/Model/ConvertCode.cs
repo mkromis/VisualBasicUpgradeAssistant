@@ -83,7 +83,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     _fileType = FileType.Module;
                     break;
                 // form or class first line
-                // 'VERSION 5.00' or 'VERSION 1.0 CLASS' 
+                // 'VERSION 5.00' or 'VERSION 1.0 CLASS'
                 case "VERSION":
                     position++;
                     version = GetWord(line, ref position);
@@ -95,6 +95,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     else
                         _fileType = FileType.Form;
                     break;
+
                 default:
                     _fileType = FileType.Unknown;
                     break;
@@ -119,10 +120,12 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     _sourceModule.Type = "form";
                     result = ParseForm(reader);
                     break;
+
                 case "BAS":
                     _sourceModule.Type = "module";
                     result = ParseModule(reader);
                     break;
+
                 case "CLS":
                     _sourceModule.Type = "class";
                     result = ParseClass(reader);
@@ -213,6 +216,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 // save control name for possible next controls as owner
                                 owner = name;
                                 break;
+
                             default:
                                 // new control
                                 control = new ControlType
@@ -257,7 +261,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         position++;
                         name = GetWord(line, ref position);
                         nestedProperty.Name = name;
-                        //            Debug.WriteLine(sName); 
+                        //            Debug.WriteLine(sName);
                         break;
 
                     case "EndProperty":
@@ -305,7 +309,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 if (level == 0 && process)
                     // visual part of form is finish
                     finish = true;
-
             }
             return true;
         }
@@ -406,7 +409,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             while (reader.Peek() > -1)
             {
                 line = reader.ReadLine();
-                //Line = Line.Trim();  
+                //Line = Line.Trim();
 
                 position = 0;
 
@@ -416,8 +419,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         line = line + reader.ReadLine();
                 // : is command delimiter
 
-
-                //  Debug.WriteLine(Line); 
+                //  Debug.WriteLine(Line);
 
                 // get first word in line
                 tempString = GetWord(line, ref position);
@@ -427,17 +429,17 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                     //Attribute VB_Name = "frmAttachement"
                     // ...
-                    //Option Explicit          
+                    //Option Explicit
                     case "Attribute":
                     case "Option":
                         break;
 
-                    // comments          
+                    // comments
                     case "'":
                         comments = comments + line + "\r\n";
                         break;
 
-                    // next can be declaration of variables   
+                    // next can be declaration of variables
 
                     //Private mlParentID As Long
                     //Private mlOwnerType As ENUM_FORM_TYPE
@@ -489,6 +491,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 bProperty = true;
 
                                 break;
+
                             default:
                                 // variable declaration
                                 variable = new Variable();
@@ -520,7 +523,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         bEnd = true;
                         break;
 
-
                     default:
                         if (bEnum)
                         {
@@ -541,7 +543,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             procedure.LineList.Add(line);
                         break;
 
-
                         // events
                         //Private Sub cmdCancel_Click()
                         //  mbEdit = False
@@ -556,14 +557,12 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         //Private Sub cmdClose_Click()
                         //  Unload Me
                         //End Sub
-
-
                 }
 
                 // if something end
                 if (bEnd)
                 {
-                    // 
+                    //
                     if (bEnum)
                     {
                         _sourceModule.EnumList.Add(enumType);
@@ -611,7 +610,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             enumItem.Value = GetWord(line, ref iPosition);
         }
 
-
         //Private mlID As Long
 
         private void ParseVariableDeclaration(Variable variable, String line)
@@ -628,9 +626,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 case "Private":
                     variable.Scope = "private";
                     break;
+
                 case "Public":
                     variable.Scope = "public";
                     break;
+
                 default:
                     variable.Scope = "private";
                     // variable name
@@ -646,14 +646,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 TempString = GetWord(line, ref iPosition);
                 variable.Name = TempString;
             }
-            // As 
+            // As
             iPosition++;
             TempString = GetWord(line, ref iPosition);
             // variable type
             iPosition++;
             TempString = GetWord(line, ref iPosition);
             variable.Type = TempString;
-
         }
 
         // properties Let, Get, Set
@@ -679,9 +678,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 case "Private":
                     property.Scope = "private";
                     break;
+
                 case "Public":
                     property.Scope = "public";
                     break;
+
                 default:
                     property.Scope = "private";
                     Status = true;
@@ -702,7 +703,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
             //Public Property Let ParentID(ByVal lValue As Long)
 
-            // name       
+            // name
             Start = iPosition;
             iPosition = line.IndexOf("(", Start + 1);
             property.Name = line.Substring(Start, iPosition - Start);
@@ -721,7 +722,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 property.ParameterList = ParameterList;
             }
 
-            // As 
+            // As
             iPosition++;
             iPosition++;
             TempString = GetWord(line, ref iPosition);
@@ -730,7 +731,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             iPosition++;
             TempString = GetWord(line, ref iPosition);
             property.Type = TempString;
-
         }
 
         // ByVal lValue As Long, ByVal sValue As string
@@ -755,6 +755,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     case "Optional":
 
                         break;
+
                     case "ByVal":
                     case "ByRef":
                         oParameter.Pass = TempString;
@@ -775,7 +776,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     TempString = GetWord(line, ref Position);
                     oParameter.Name = TempString;
                 }
-                // As 
+                // As
                 Position++;
                 TempString = GetWord(line, ref Position);
                 // parameter type
@@ -793,7 +794,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 if (Position == -1)
                     // end
                     bFinish = true;
-
             }
         }
 
@@ -820,10 +820,12 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     procedure.Scope = "private";
                     status = true;
                     break;
+
                 case "Public":
                     procedure.Scope = "public";
                     status = true;
                     break;
+
                 default:
                     procedure.Scope = "private";
                     status = true;
@@ -843,9 +845,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 case "Sub":
                     procedure.Type = ProcedureType.Subroutine;
                     break;
+
                 case "Function":
                     procedure.Type = ProcedureType.Function;
                     break;
+
                 case "Event":
                     procedure.Type = ProcedureType.Event;
                     break;
@@ -881,9 +885,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 position++;
                 procedure.ReturnType = GetWord(line, ref position);
             }
-
         }
-
 
         // generate result file
         // OutPath for pictures
@@ -893,7 +895,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
             String temp = String.Empty;
 
-            // convert source to target    
+            // convert source to target
             _targetModule = new Module();
             _tools.ParseModule(_sourceModule, _targetModule);
 
@@ -913,7 +915,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 result.Append("using System.Windows.Forms;\r\n");
             }
 
-
             result.Append("\r\n");
             result.Append("namespace ProjectName\r\n");
             // start namepsace region
@@ -922,16 +923,17 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             result.Append(Indent2 + "/// Summary description for " + _sourceModule.Name + ".\r\n");
             result.Append(Indent2 + "/// </summary>\r\n");
 
-
             switch (_targetModule.Type)
             {
                 case "form":
                     result.Append(Indent2 + "public class " + _sourceModule.Name + " : System.Windows.Forms.Form\r\n");
                     break;
+
                 case "module":
                     result.Append(Indent2 + "sealed class " + _sourceModule.Name + "\r\n");
                     // all procedures must be static
                     break;
+
                 case "class":
                     result.Append(Indent2 + "public class " + _sourceModule.Name + "\r\n");
                     break;
@@ -1002,7 +1004,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     result.Append(Indent6 + "this." + oControl.Name
                       + " = new System.Windows.Forms." + oControl.Type
                       + "();\r\n");
-
                 }
 
                 // SuspendLayout part
@@ -1019,7 +1020,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         result.Append(Indent6 + "this." + control.Name + ".SuspendLayout();\r\n");
                     }
 
-                // each controls and his property		  
+                // each controls and his property
                 foreach (ControlType control in _targetModule.ControlList)
                 {
                     result.Append(Indent6 + "//\r\n");
@@ -1050,7 +1051,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     {
                         // exception for menu controls
                         if (control.Type == "MainMenu" || control.Type == "MenuItem")
-                            // this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] 
+                            // this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[]
                             result.Append(Indent6 + "this." + control.Name
                               + ".MenuItems.AddRange(new System.Windows.Forms.MenuItem[]\r\n");
                         else
@@ -1062,7 +1063,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         result.Append(temp);
                         // remove last comma, keep CRLF
                         result.Remove(result.Length - 3, 1);
-                        // close addrange part  
+                        // close addrange part
                         result.Append(Indent6 + "});\r\n");
                     }
                     // unsupported control
@@ -1076,7 +1077,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 result.Append(Indent6 + "this.Controls.AddRange(new System.Windows.Forms.Control[]\r\n");
                 result.Append(Indent6 + "{\r\n");
 
-
                 // add control range to form
                 foreach (ControlType oControl in _targetModule.ControlList)
                 {
@@ -1089,7 +1089,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                 // remove last comma, keep CRLF
                 result.Remove(result.Length - 3, 1);
-                // close addrange part  
+                // close addrange part
                 result.Append(Indent6 + "});\r\n");
 
                 // form name
@@ -1110,7 +1110,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                 // this.CancelButton = this.cmdExit;
 
-
                 // this.Frame1.ResumeLayout(false);
                 // resume layout for each container
                 foreach (ControlType control in _targetModule.ControlList)
@@ -1127,7 +1126,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 result.Append(Indent4 + "}\r\n");
                 result.Append(Indent4 + "#endregion\r\n");
             } // if (mTargetModule.Type = "form")
-
 
             // ********************************************************
             // enums
@@ -1151,7 +1149,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             result.Append(" = " + oEnumItem.Value);
                         // enum items delimiter
                         result.Append(",\r\n");
-
                     }
                     // remove last comma, keep CRLF
                     result.Remove(result.Length - 3, 1);
@@ -1183,7 +1180,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 {
                     // new line
                     result.Append("\r\n");
-                    //public string Comment  
+                    //public string Comment
                     //{
                     //  get { return mComment; }
                     //  set { mComment = value; }
@@ -1227,9 +1224,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         case ProcedureType.Subroutine:
                             result.Append("void");
                             break;
+
                         case ProcedureType.Function:
                             result.Append(oProcedure.ReturnType);
                             break;
+
                         case ProcedureType.Event:
                             result.Append("void");
                             break;
@@ -1261,10 +1260,10 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
             // end class
             result.Append(Indent2 + "}\r\n");
-            // end namespace               
+            // end namespace
             result.Append("}\r\n");
 
-            // return result      
+            // return result
             return result.ToString();
         }
 
@@ -1340,10 +1339,10 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             else
                 return false;
             // save it to resx
-            //      Debug.WriteLine(ModuleName + ", " + ResourceName + ", " + Temp + ", " + oImage.Width.ToString() );  
-            //      
+            //      Debug.WriteLine(ModuleName + ", " + ResourceName + ", " + Temp + ", " + oImage.Width.ToString() );
+            //
             //      ResXResourceWriter oWriter;
-            //      
+            //
             //      sResxName = @"C:\temp\test\" + ModuleName + ".resx";
             //      oWriter = new ResXResourceWriter(sResxName);
             //     // oImage = Image.FromFile(myRow[sField].ToString());
@@ -1353,7 +1352,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
             //      MemoryStream s = new MemoryStream();
             //      oImage.Save(s);
-            //      
+            //
             //      byte[] b = s.ToArray();
             //      String strContents = System.Security.Cryptography.EncodeAsBase64.EncodeBuffer(b);
             //      myXmlTextNode.Value = strContents;
@@ -1364,13 +1363,12 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             //System.Security.Cryptography.DecodeBase64.DecodeBuffer(myXmlTextNode.Value);
 
             //      ResourceWriter oWriter;
-            //      
+            //
             //      sResxName = @"c:\temp\" + ModuleName + ".resx";
             //      oWriter = new ResourceWriter(sResxName);
             //     // oImage = Image.FromFile(myRow[sField].ToString());
             //      oWriter.AddResource(ResourceName, oImage);
-            //      oWriter.Close();      
-
+            //      oWriter.Close();
         }
 
         private String GetWord(String line, ref Int32 position)
@@ -1411,9 +1409,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     case "BackgroundImage":
                         ResourceName = "$this.BackgroundImage";
                         break;
+
                     case "Icon":
                         ResourceName = "$this.Icon";
                         break;
+
                     case "Image":
                         ResourceName = name + ".Image";
                         break;
@@ -1426,11 +1426,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                               + property.Name + " = ((System.Drawing.Bitmap)(resources.GetObject("
                               + (Char)34 + "$this.BackgroundImage" + (Char)34 + ")));\r\n");
                             break;
+
                         case "Icon":
                             result.Append(Indent6 + "this."
                               + property.Name + " = ((System.Drawing.Icon)(resources.GetObject("
                               + (Char)34 + "$this.Icon" + (Char)34 + ")));\r\n");
                             break;
+
                         case "Image":
                             result.Append(Indent6 + "this." + name + "."
                               + property.Name + " = ((System.Drawing.Bitmap)(resources.GetObject("

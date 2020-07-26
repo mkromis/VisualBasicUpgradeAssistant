@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Windows;
-using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using MinoriEditorShell.Services;
 using MvvmCross;
@@ -17,7 +16,8 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
         private String? _outPath;
         private String? _csharpText;
 
-        public String? CSharpText {
+        public String? CSharpText
+        {
             get => _csharpText;
             private set => SetProperty(ref _csharpText, value);
         }
@@ -110,15 +110,15 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
 
         //    private string FileSave()
         //    {
-        //      string sFilter = "C# Files (*.cs)|*.cs" ;	
+        //      string sFilter = "C# Files (*.cs)|*.cs" ;
         //      string sResult = null;
         //
-        //      SaveFileDialog oDialog = new SaveFileDialog();		
+        //      SaveFileDialog oDialog = new SaveFileDialog();
         //      oDialog.Filter = sFilter;
-        //      if(oDialog.ShowDialog() != DialogResult.Cancel)	
-        //      {		
+        //      if(oDialog.ShowDialog() != DialogResult.Cancel)
+        //      {
         //        sResult = oDialog.FileName;
-        //      }	
+        //      }
         //      return sResult;
         //    }
 

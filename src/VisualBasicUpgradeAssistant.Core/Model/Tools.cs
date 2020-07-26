@@ -88,7 +88,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                     Int32 Index = 0;
                     ControlType oTabPage = null;
-                    // each property  
+                    // each property
                     foreach (ControlProperty oTargetProperty in oTargetControl.PropertyList)
                     {
                         // TabCaption = create new tab
@@ -175,7 +175,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 }
             }
 
-
             // process enums
             ParseEnums(sourceModule, targetModule);
             // process variables
@@ -184,7 +183,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             ParseClassProperties(sourceModule, targetModule);
             // process procedures
             ParseProcedures(sourceModule, targetModule);
-
 
             return true;
         }
@@ -204,8 +202,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             }
             else
                 return tabName;
-
-
         }
 
         public Boolean ParseControls(Module module, List<ControlType> sourceControlList, List<ControlType> targetControlList)
@@ -255,7 +251,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         {
             ControlProperty TargetProperty = null;
 
-            // each property  
+            // each property
             foreach (ControlProperty SourceProperty in sourcePropertyList)
             {
                 TargetProperty = new ControlProperty();
@@ -280,7 +276,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         {
             Variable TargetVariable = null;
 
-            // each property  
+            // each property
             foreach (Variable SourceVariable in sourceVariableList)
             {
                 TargetVariable = new Variable();
@@ -299,32 +295,41 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 case "Long":
                     TargetType = "int";
                     break;
+
                 case "Integer":
                     TargetType = "short";
                     break;
+
                 case "Byte":
                     TargetType = "byte";
                     break;
+
                 case "String":
                     TargetType = "string";
                     break;
+
                 case "Boolean":
                     TargetType = "bool";
                     break;
+
                 case "Currency":
                     TargetType = "decimal";
                     break;
+
                 case "Single":
                     TargetType = "float";
                     break;
+
                 case "Double":
                     TargetType = "double";
                     break;
+
                 case "ADODB.Recordset":
                 case "DAO.Recordset":
                 case "Recordset":
                     TargetType = "DataReader";
                     break;
+
                 default:
                     TargetType = sourceType;
                     break;
@@ -334,7 +339,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         public Boolean ParseVariable(Variable sourceVariable, Variable targetVariable)
         {
-
             targetVariable.Scope = sourceVariable.Scope;
             targetVariable.Name = sourceVariable.Name;
             targetVariable.Type = VariableTypeConvert(sourceVariable.Type);
@@ -358,6 +362,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     case "Get":
                         TargetProperty.Direction = "get";
                         break;
+
                     case "Set":
                     case "Let":
                         TargetProperty.Direction = "set";
@@ -369,9 +374,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 foreach (String Line in SourceProperty.LineList)
                     if (Line.Trim() != String.Empty)
                         TargetProperty.LineList.Add(Line);
-
-
-
 
                 targetModule.PropertyList.Add(TargetProperty);
             }
@@ -518,7 +520,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             TargetProcedure.LineList.Add(Temp);
                         else
                             TargetProcedure.LineList.Add(TempLine);
-
                     }
                     else
                         TargetProcedure.LineList.Add(String.Empty);
@@ -529,12 +530,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             return true;
         }
 
-
         public Boolean ParseControlProperties(Module module, ControlType control, List<ControlProperty> sourcePropertyList, List<ControlProperty> targetPropertyList)
         {
             ControlProperty TargetProperty = null;
 
-            // each property  
+            // each property
             foreach (ControlProperty SourceProperty in sourcePropertyList)
                 if (SourceProperty.Name == "Index")
                     // Index           =   3
@@ -564,7 +564,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 case "Appearance":
                 case "ScaleHeight":
                 case "ScaleWidth":
-                case "Style":             // button  
+                case "Style":             // button
                 case "BackStyle":         //label
                 case "IMEMode":
                 case "WhatsThisHelpID":
@@ -587,9 +587,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         case "0":
                             targetProperty.Value = targetProperty.Value + "TopLeft";
                             break;
+
                         case "1":
                             targetProperty.Value = targetProperty.Value + "TopRight";
                             break;
+
                         case "2":
                         default:
                             targetProperty.Value = targetProperty.Value + "TopCenter";
@@ -627,19 +629,24 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             case "0":
                                 targetProperty.Value = targetProperty.Value + "None";
                                 break;
+
                             default:
                             case "1":
                                 targetProperty.Value = targetProperty.Value + "FixedSingle";
                                 break;
+
                             case "2":
                                 targetProperty.Value = targetProperty.Value + "Sizable";
                                 break;
+
                             case "3":
                                 targetProperty.Value = targetProperty.Value + "FixedDialog";
                                 break;
+
                             case "4":
                                 targetProperty.Value = targetProperty.Value + "FixedToolWindow";
                                 break;
+
                             case "5":
                                 targetProperty.Value = targetProperty.Value + "SizableToolWindow";
                                 break;
@@ -654,9 +661,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             case "0":
                                 targetProperty.Value = targetProperty.Value + "None";
                                 break;
+
                             case "1":
                                 targetProperty.Value = targetProperty.Value + "FixedSingle";
                                 break;
+
                             case "2":
                             default:
                                 targetProperty.Value = targetProperty.Value + "Fixed3D";
@@ -671,7 +680,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     targetProperty.Value = sourceProperty.Value;
                     break;
 
-                // this.cmdExit.Size = new System.Drawing.Size(80, 40);              
+                // this.cmdExit.Size = new System.Drawing.Size(80, 40);
                 case "Height":
                     targetProperty.Name = "Size";
                     targetProperty.Value = "new System.Drawing.Size(" + GetSize("Height", "Width", sourcePropertyList) + ")";
@@ -687,6 +696,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     else
                         validProperty = false;
                     break;
+
                 case "Top":
                 case "Width":
                     // nothing, already processed by Height, Left
@@ -738,12 +748,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             targetProperty.Name = "Checked";
                             targetProperty.Value = GetBool(sourceProperty.Value);
                             break;
+
                         case "CheckBox":
                             //.CheckState = System.Windows.Forms.CheckState.Checked;
                             targetProperty.Name = "CheckState";
                             targetProperty.Value = "System.Windows.Forms.CheckState.";
                             // 0 - Unchecked
-                            // 1 - checked 
+                            // 1 - checked
                             // 2 - grayed
                             switch (sourceProperty.Value)
                             {
@@ -751,14 +762,17 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 case "0":
                                     targetProperty.Value = targetProperty.Value + "Unchecked";
                                     break;
+
                                 case "1":
                                     targetProperty.Value = targetProperty.Value + "Checked";
                                     break;
+
                                 case "2":
                                     targetProperty.Value = targetProperty.Value + "Indeterminate";
                                     break;
                             }
                             break;
+
                         default:
                             targetProperty.Value = targetProperty.Value + "Both";
                             break;
@@ -779,6 +793,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         targetProperty.Value = "System.Windows.Forms.DialogResult.Cancel";
                     }
                     break;
+
                 case "Default":
                     if (Int32.Parse(sourceProperty.Value) != 0)
                     {
@@ -791,8 +806,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 //                this.ClientSize = new System.Drawing.Size(704, 565);
                 //                this.MinimumSize = new System.Drawing.Size(712, 592);
 
-
-                // direct value    
+                // direct value
                 case "TabIndex":
                 case "Tag":
                     // except MenuItem
@@ -869,12 +883,15 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         case "0":
                             targetProperty.Value = targetProperty.Value + "None";
                             break;
+
                         case "1":
                             targetProperty.Value = targetProperty.Value + "Horizontal";
                             break;
+
                         case "2":
                             targetProperty.Value = targetProperty.Value + "Vertical";
                             break;
+
                         case "3":
                             targetProperty.Value = targetProperty.Value + "Both";
                             break;
@@ -891,12 +908,15 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         case "0":
                             targetProperty.Value = targetProperty.Value + "Top";
                             break;
+
                         case "1":
                             targetProperty.Value = targetProperty.Value + "Bottom";
                             break;
+
                         case "2":
                             targetProperty.Value = targetProperty.Value + "Left";
                             break;
+
                         case "3":
                             targetProperty.Value = targetProperty.Value + "Right";
                             break;
@@ -936,7 +956,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                 // end List view
 
-
                 // VB6 form unsupported properties
                 case "MDIChild":
                 case "WhatsThisButton":
@@ -950,7 +969,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     validProperty = false;
                     break;
 
-                // supported properties  
+                // supported properties
 
                 case "ControlBox":
                 case "KeyPreview":
@@ -977,18 +996,22 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     targetProperty.Name = "MaximizeBox";
                     targetProperty.Value = GetBool(sourceProperty.Value);
                     break;
+
                 case "MinButton":
                     targetProperty.Name = "MinimizeBox";
                     targetProperty.Value = GetBool(sourceProperty.Value);
                     break;
+
                 case "WhatsThisHelp":
                     targetProperty.Name = "HelpButton";
                     targetProperty.Value = GetBool(sourceProperty.Value);
                     break;
+
                 case "ShowInTaskbar":
                     targetProperty.Name = sourceProperty.Name;
                     targetProperty.Value = GetBool(sourceProperty.Value);
                     break;
+
                 case "WindowList":
                     targetProperty.Name = "MdiList";
                     targetProperty.Value = GetBool(sourceProperty.Value);
@@ -1007,9 +1030,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         default:
                             targetProperty.Value = targetProperty.Value + "Normal";
                             break;
+
                         case "1":
                             targetProperty.Value = targetProperty.Value + "Minimized";
                             break;
+
                         case "2":
                             targetProperty.Value = targetProperty.Value + "Maximized";
                             break;
@@ -1028,12 +1053,15 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         case "0":
                             targetProperty.Value = targetProperty.Value + "Manual";
                             break;
+
                         case "1":
                             targetProperty.Value = targetProperty.Value + "CenterParent";
                             break;
+
                         case "2":
                             targetProperty.Value = targetProperty.Value + "CenterScreen";
                             break;
+
                         case "3":
                         default:
                             targetProperty.Value = targetProperty.Value + "WindowsDefaultLocation";
@@ -1048,7 +1076,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     break;
             }
             return validProperty;
-
         }
 
         private void ConvertFont(ControlProperty sourceProperty, ControlProperty targetProperty)
@@ -1061,7 +1088,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             Boolean FontItalic = false;
             Boolean FontStrikethrough = false;
             String Temp = String.Empty;
-            //      BeginProperty Font 
+            //      BeginProperty Font
             //         Name            =   "Arial"
             //         Size            =   8.25
             //         Charset         =   238
@@ -1077,9 +1104,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     case "Name":
                         FontName = oProperty.Value;
                         break;
+
                     case "Size":
                         FontSize = GetFontSizeInt(oProperty.Value);
                         break;
+
                     case "Weight":
                         //        If tLogFont.lfWeight >= FW_BOLD Then
                         //          bFontBold = True
@@ -1089,27 +1118,31 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         // FW_BOLD = 700
                         FontBold = Int32.Parse(oProperty.Value) >= 700;
                         break;
+
                     case "Charset":
                         FontCharSet = Int32.Parse(oProperty.Value);
                         break;
+
                     case "Underline":
                         FontUnderline = Int32.Parse(oProperty.Value) != 0;
                         break;
+
                     case "Italic":
                         FontItalic = Int32.Parse(oProperty.Value) != 0;
                         break;
+
                     case "Strikethrough":
                         FontStrikethrough = Int32.Parse(oProperty.Value) != 0;
                         break;
                 }
 
-            //      this.cmdExit.Font = new System.Drawing.Font("Tahoma", 12F, 
+            //      this.cmdExit.Font = new System.Drawing.Font("Tahoma", 12F,
             //        (System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline
-            //        | System.Drawing.FontStyle.Strikeout), System.Drawing.GraphicsUnit.Point, 
+            //        | System.Drawing.FontStyle.Strikeout), System.Drawing.GraphicsUnit.Point,
             //        ((System.Byte)(0)));
 
-            // this.cmdExit.Font = new System.Drawing.Font("Tahoma", 12F, 
-            // System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, 
+            // this.cmdExit.Font = new System.Drawing.Font("Tahoma", 12F,
+            // System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point,
             // ((System.Byte)(238)));
 
             targetProperty.Name = "Font";
@@ -1190,7 +1223,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             Int32 HeightValue = 0;
             Int32 WidthValue = 0;
 
-            // each property  
+            // each property
             foreach (ControlProperty oProperty in propertyList)
             {
                 if (oProperty.Name == height)
@@ -1207,7 +1240,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             Int32 Left = 0;
             Int32 Top = 0;
 
-            // each property  
+            // each property
             foreach (ControlProperty oProperty in propertyList)
             {
                 if (oProperty.Name == "Left")
@@ -1247,19 +1280,17 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             imageString = new Byte[bytesToRead];
             imageString = Reader.ReadBytes(bytesToRead);
 
-
             //      Stream = new FileStream( @"C:\temp\test\Ba.bmp", FileMode.CreateNew, FileAccess.Write );
             //      BinaryWriter Writer = new BinaryWriter( Stream );
-            //      Writer.Write(ImageString, 8, ImageString.GetLength(0) - 8);           
+            //      Writer.Write(ImageString, 8, ImageString.GetLength(0) - 8);
             //      Stream.Close();
-            //      Writer.Close(); 
+            //      Writer.Close();
 
             //  FileStream inFile = new FileStream(@"C:\WINdows\Blue Lace 16.bmp", FileMode.Open, FileAccess.Read);
             //  ReturnImage = Image.FromStream(inFile, false);
 
             Stream.Close();
             Reader.Close();
-
         }
     }
 }
