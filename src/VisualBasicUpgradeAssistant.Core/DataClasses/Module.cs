@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace VisualBasicUpgradeAssistant.Core.DataClasses
 {
@@ -23,6 +21,7 @@ namespace VisualBasicUpgradeAssistant.Core.DataClasses
         public List<Property> PropertyList { get; set; }
         public List<Procedure> ProcedureList { get; set; }
         public List<EnumType> EnumList { get; set; }
+
         public Module()
         {
             FormPropertyList = new List<ControlProperty>();
@@ -33,6 +32,5 @@ namespace VisualBasicUpgradeAssistant.Core.DataClasses
             ProcedureList = new List<Procedure>();
             EnumList = new List<EnumType>();
         }
-
     }
 }

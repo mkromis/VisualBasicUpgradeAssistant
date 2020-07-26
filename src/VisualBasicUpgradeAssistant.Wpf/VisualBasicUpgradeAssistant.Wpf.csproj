@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MinoriEditorShell.Ribbon" Version="0.3.0-alpha.87" />
+    <PackageReference Include="MinoriEditorShell.Ribbon" Version="0.3.0-alpha.751" />
     <PackageReference Include="MvvmCross.Platforms.Wpf" Version="6.4.2" />
     <PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
   </ItemGroup>

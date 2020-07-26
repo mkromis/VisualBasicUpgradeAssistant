@@ -14,7 +14,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model.Tests
         [TestMethod]
         public void ReadDataTest()
         {
-            // Setup initial 
+            // Setup initial
             String execPath = AppDomain.CurrentDomain.BaseDirectory;
             String jsonFullPath = Path.Combine(execPath, "Resources", "ControlList.json");
             FileInfo jsonPath = new FileInfo(jsonFullPath);
