@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using VisualBasicUpgradeAssistant.Core.Model;
 
 namespace VisualBasicUpgradeAssistant.Core.Services
 {
@@ -11,8 +13,64 @@ namespace VisualBasicUpgradeAssistant.Core.Services
             String basename = Path.GetFileNameWithoutExtension(source.Name);
 
             CreateProject(dest, basename);
-
+            ConvertFiles(source, dest, basename);
             // fill the files.
+        }
+
+        private void ConvertFiles(FileInfo project, DirectoryInfo dest, String basename)
+        {
+            DirectoryInfo sourceDir = project.Directory;
+
+            String winformsPath =
+                Path.Combine(dest.FullName, basename, $"{basename}.Desktop", "UserInterface")
+                + Path.DirectorySeparatorChar;
+            String modulesPath =
+                Path.Combine(dest.FullName, basename, $"{basename}.Core", "Helpers")
+                + Path.DirectorySeparatorChar;
+            String classPath =
+                Path.Combine(dest.FullName, basename, $"{basename}.Core", "Services")
+                + Path.DirectorySeparatorChar;
+
+            Directory.CreateDirectory(winformsPath);
+            Directory.CreateDirectory(modulesPath);
+            Directory.CreateDirectory(classPath);
+
+            ConvertCode convertCode = new ConvertCode();
+            using (TextReader reader = project.OpenText())
+            {
+                while (reader.Peek() > 0)
+                {
+                    String line = reader.ReadLine();
+                    if (String.IsNullOrEmpty(line))
+                        return;
+
+                    String[] kvm = line.Split('=');
+                    switch (kvm.FirstOrDefault())
+                    {
+                        case "Class": // Last part Only
+                            String classFile = kvm.Last().Split(';').Last().Trim();
+                            String classFilePath = Path.Combine(sourceDir.FullName, classFile);
+                            Debug.WriteLine($"class:{classFile}");
+                            convertCode.ParseFile(classFilePath, classPath);
+                            break;
+
+                        case "Module": // Last part only
+                            String moduleFile = kvm.Last().Split(';').Last().Trim();
+                            String moduleFilePath = Path.Combine(sourceDir.FullName, moduleFile);
+                            Debug.WriteLine($"module:{moduleFile}");
+                            convertCode.ParseFile(moduleFilePath, modulesPath);
+                            break;
+
+                        case "Form":
+                            // Form files go to desktop
+                            String formFile = kvm[1];
+                            String formFilePath = Path.Combine(sourceDir.FullName, formFile);
+                            Debug.WriteLine($"Form:{formFile}");
+                            convertCode.ParseFile(formFilePath, winformsPath);
+                            break;
+                    }
+                }
+            }
         }
 
         private static void CreateProject(DirectoryInfo dest, String basename)
