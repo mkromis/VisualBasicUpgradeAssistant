@@ -219,9 +219,9 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 };
 
                 // compare upper case type
-                if (_controlList.ContainsKey(sourceControl.Type.ToUpper()))
+                if (_controlList.ContainsKey(sourceControl.Type))
                 {
-                    Controltem item = (Controltem)_controlList[sourceControl.Type.ToUpper()];
+                    Controltem item = (Controltem)_controlList[sourceControl.Type];
 
                     if (item.Unsupported)
                     {
