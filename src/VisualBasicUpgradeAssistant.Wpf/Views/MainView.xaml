@@ -18,6 +18,10 @@
                         Header="Load..."
                         Command="{Binding OpenOmegaCommand}"
                         LargeIcon="/Resources/OMEGA.png" />
+                    <ribbon:Button
+                        Header="Convert to C#"
+                        Command="{Binding OpenProjectConverter}"
+                        LargeIcon="/Resources/CS-Icon.png" />
                 </ribbon:RibbonGroupBox>
             </ribbon:RibbonTabItem>
         </ribbon:Ribbon>

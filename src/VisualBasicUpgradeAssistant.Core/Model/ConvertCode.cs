@@ -6,6 +6,7 @@ using System.IO;
 using System.Resources;
 using System.Text;
 using VisualBasicUpgradeAssistant.Core.DataClasses;
+using VisualBasicUpgradeAssistant.Core.Extensions;
 
 namespace VisualBasicUpgradeAssistant.Core.Model
 {
@@ -45,31 +46,27 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         public String OutSourceCode { get; private set; }
 
-        public Boolean ParseFile(String fileName, String outPath)
+        public Boolean ParseFile(FileInfo filepath, DirectoryInfo outDir)
         {
-            String line;
             String temp;
-            String extension;
             String version = String.Empty;
-            Boolean result;
             Int32 position;
 
             // try recognize source code type depend by file extension
-            extension = fileName.Substring(fileName.Length - 3, 3);
-            _fileType = (extension.ToUpper()) switch
+            String extension = filepath.Extension.ToLowerInvariant();
+            _fileType = extension switch
             {
-                "FRM" => FileType.Form,
-                "BAS" => FileType.Module,
-                "CLS" => FileType.Class,
+                ".frm" => FileType.Form,
+                ".bas" => FileType.Module,
+                ".cls" => FileType.Class,
                 _ => FileType.Unknown,
             };
 
             // open file
-            FileStream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-            StreamReader reader = new StreamReader(stream);
-            // Start from begin.
-            reader.BaseStream.Seek(0, SeekOrigin.Begin);
-            line = reader.ReadLine();
+            using FileStream inputStream = filepath.OpenRead();
+            StreamReader reader = new StreamReader(inputStream);
+
+            String line = reader.ReadLine();
             // verify type of file based on first line - form, module, class
 
             // get first word from first line
@@ -88,7 +85,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     position++;
                     version = GetWord(line, ref position);
 
-                    //            Debug.WriteLine (Line + " " + Version);
+                    //Debug.WriteLine (Line + " " + Version);
 
                     if (line.IndexOf(CLASS_FIRST_LINE, 0) > -1)
                         _fileType = FileType.Class;
@@ -110,48 +107,48 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             _sourceModule = new Module
             {
                 Version = version,
-                FileName = fileName
+                FileName = filepath.FullName
             };
 
             // now parse specifics of each type
-            switch (extension.ToUpper())
+            switch (_fileType)
             {
-                case "FRM":
-                    _sourceModule.Type = "form";
-                    result = ParseForm(reader);
+                case FileType.Form:
+                    _sourceModule.Type = FileType.Form;
+                    ParseForm(reader);
                     break;
 
-                case "BAS":
-                    _sourceModule.Type = "module";
-                    result = ParseModule(reader);
+                case FileType.Module:
+                    _sourceModule.Type = FileType.Module;
+                    ParseModule(reader);
                     break;
 
-                case "CLS":
-                    _sourceModule.Type = "class";
-                    result = ParseClass(reader);
+                case FileType.Class:
+                    _sourceModule.Type = FileType.Class;
+                    ParseClass(reader);
                     break;
             }
             // parse remain - variables, functions, procedures
-            result = ParseProcedures(reader);
+            ParseProcedures(reader);
 
-            stream.Close();
+            inputStream.Close();
             reader.Close();
 
             // generate output file
-            OutSourceCode = GetOutSourceCode(outPath);
+            OutSourceCode = GetOutSourceCode(outDir);
 
             // save result
-            String OutFileName = outPath + _targetModule.FileName;
-            stream = new FileStream(OutFileName, FileMode.OpenOrCreate);
-            StreamWriter Writer = new StreamWriter(stream);
+            FileInfo outFileName = outDir.PathCombineFile(_targetModule.FileName);
+            using Stream outputSteam = outFileName.Create();
+            StreamWriter Writer = new StreamWriter(outputSteam);
             Writer.Write(OutSourceCode);
             Writer.Close();
             // generate resx file if source form contain any images
 
             if (_targetModule.ImagesUsed)
-                WriteResX(_targetModule.ImageList, outPath, _targetModule.Name);
+                WriteResX(_targetModule.ImageList, outDir, _targetModule.Name);
 
-            return result;
+            return true;
         }
 
         private Boolean ParseForm(StreamReader reader)
@@ -889,7 +886,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         // generate result file
         // OutPath for pictures
-        private String GetOutSourceCode(String outPath)
+        private String GetOutSourceCode(DirectoryInfo outPath)
         {
             StringBuilder result = new StringBuilder();
 
@@ -907,7 +904,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             // ********************************************************
             // only form class
             // ********************************************************
-            if (_targetModule.Type == "form")
+            if (_targetModule.Type == FileType.Form)
             {
                 result.Append("using System.Drawing;\r\n");
                 result.Append("using System.Collections;\r\n");
@@ -925,16 +922,16 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
             switch (_targetModule.Type)
             {
-                case "form":
+                case FileType.Form:
                     result.Append(Indent2 + "public class " + _sourceModule.Name + " : System.Windows.Forms.Form\r\n");
                     break;
 
-                case "module":
+                case FileType.Module:
                     result.Append(Indent2 + "sealed class " + _sourceModule.Name + "\r\n");
                     // all procedures must be static
                     break;
 
-                case "class":
+                case FileType.Class:
                     result.Append(Indent2 + "public class " + _sourceModule.Name + "\r\n");
                     break;
             }
@@ -945,7 +942,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             // only form class
             // ********************************************************
 
-            if (_targetModule.Type == "form")
+            if (_targetModule.Type == FileType.Form)
             {
                 // list of controls
                 foreach (ControlType oControl in _targetModule.ControlList)
@@ -1105,7 +1102,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 {
                     if (!property.Valid)
                         result.Append("//");
-                    GetPropertyRow(result, _targetModule.Type, "", property, outPath);
+                    GetPropertyRow(result, _targetModule.Type.ToString(), "", property, outPath);
                 }
 
                 // this.CancelButton = this.cmdExit;
@@ -1174,7 +1171,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             // properties has only forms and classes
             // ********************************************************
 
-            if (_targetModule.Type == "form" || _targetModule.Type == "class")
+            if (_targetModule.Type == FileType.Form || _targetModule.Type == FileType.Class)
                 // properties
                 if (_targetModule.PropertyList.Count > 0)
                 {
@@ -1267,22 +1264,24 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             return result.ToString();
         }
 
-        private void WriteResX(List<String> imageList, String outPath, String moduleName)
+        private void WriteResX(List<String> imageList, DirectoryInfo outPath, String moduleName)
         {
-            String sResxName;
-
             if (imageList.Count > 0)
             {
                 // resx name
-                sResxName = outPath + moduleName + ".resx";
+                FileInfo resxName = outPath.PathCombineFile($"{moduleName}.resx");
                 // open file
-                ResXResourceWriter rsxw = new ResXResourceWriter(sResxName);
+                ResXResourceWriter rsxw = new ResXResourceWriter(resxName.FullName);
 
-                foreach (String ResourceName in imageList)
+                foreach (String resourceName in imageList)
                     try
                     {
-                        Image img = Image.FromFile(outPath + ResourceName);
-                        rsxw.AddResource(ResourceName, img);
+                        DirectoryInfo resourcePath = outPath.Parent.PathCombineDirectory("Resources");
+                        if (!resourcePath.Exists)
+                            resourcePath.Create();
+
+                        Image img = Image.FromFile(resourcePath.PathCombineFile(resourceName).FullName);
+                        rsxw.AddResource(resourceName, img);
                         img.Dispose();
                     }
                     catch
@@ -1292,11 +1291,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 rsxw.Close();
 
                 foreach (String ResourceName in imageList)
-                    File.Delete(outPath + ResourceName);
+                    outPath.PathCombineFile(ResourceName).Delete();
             }
         }
 
-        private Boolean WriteImage(Module sourceModule, String resourceName, String value, String outPath)
+        private Boolean WriteImage(Module sourceModule, String resourceName, String value, DirectoryInfo outPath)
         {
             String Temp = String.Empty;
             Int32 Offset = 0;
@@ -1324,9 +1323,17 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
             if (imageString.GetLength(0) - 8 > 0)
             {
-                if (File.Exists(outPath + resourceName))
-                    File.Delete(outPath + resourceName);
-                FileStream Stream = Stream = new FileStream(outPath + resourceName, FileMode.CreateNew, FileAccess.Write);
+                DirectoryInfo resourceDir = outPath.Parent.PathCombineDirectory("Resources");
+                if (!resourceDir.Exists)
+                {
+                    resourceDir.Create();
+                }
+                FileInfo resourcePath = resourceDir.PathCombineFile(resourceName);
+                if (resourcePath.Exists)
+                {
+                    resourcePath.Delete();
+                }
+                using FileStream Stream = resourcePath.Create();
                 BinaryWriter Writer = new BinaryWriter(Stream);
                 Writer.Write(imageString, 8, imageString.GetLength(0) - 8);
                 Stream.Close();
@@ -1392,7 +1399,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         }
 
         private void GetPropertyRow(StringBuilder result, String type,
-                                    String name, ControlProperty property, String outPath)
+                                    String name, ControlProperty property, DirectoryInfo outPath)
         {
             // exception for images
             if (property.Name == "Icon" || property.Name == "Image" || property.Name == "BackgroundImage")
@@ -1445,7 +1452,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 // unsupported property
                 if (!property.Valid)
                     result.Append("//");
-                if (type == "form")
+                if (type == "Form")
                     // form properties
                     result.Append(Indent6 + "this."
                       + property.Name + " = " + property.Value + ";\r\n");
