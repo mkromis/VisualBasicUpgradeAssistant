@@ -18,5 +18,6 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
         }
 
         public IMvxCommand OpenOmegaCommand => new MvxCommand(() => NavigationService.Navigate<OmegaViewModel>());
+        public IMvxCommand OpenProjectConverter => new MvxCommand(() => NavigationService.Navigate<ProjectConverterViewModel>());
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using VisualBasicUpgradeAssistant.Core.Model;
 
 namespace VisualBasicUpgradeAssistant.Core.DataClasses
 {
@@ -9,7 +10,7 @@ namespace VisualBasicUpgradeAssistant.Core.DataClasses
     public class Module
     {
         public String Name { get; set; }
-        public String Type { get; set; }
+        public FileType Type { get; set; }
         public String Version { get; set; }
         public String FileName { get; set; }
         public Boolean ImagesUsed { get; set; } = false;

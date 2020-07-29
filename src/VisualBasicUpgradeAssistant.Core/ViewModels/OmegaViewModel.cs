@@ -56,10 +56,11 @@ namespace VisualBasicUpgradeAssistant.Core.ViewModels
                     OutPath += @"\";
                 }
 
-                ConvertObject.ParseFile(_fileName, OutPath);
+                throw new NotImplementedException();
+                //ConvertObject.ParseFile(_fileName, OutPath);
 
                 // show result
-                CSharpText = ConvertObject.OutSourceCode;
+                //CSharpText = ConvertObject.OutSourceCode;
             }
         });
 
