@@ -87,19 +87,19 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     //          this.tabPage1 = new System.Windows.Forms.TabPage();
 
                     Int32 Index = 0;
-                    ControlType oTabPage = null;
+                    ControlType tabPage = null;
                     // each property
-                    foreach (ControlProperty oTargetProperty in oTargetControl.PropertyList)
+                    foreach (ControlProperty targetProperty in oTargetControl.PropertyList)
                     {
                         // TabCaption = create new tab
                         //      this.SSTab1.(TabCaption(0)) = "Tab 0";
 
-                        Console.WriteLine(oTargetProperty.Name);
+                        Console.WriteLine(targetProperty.Name);
 
-                        if (oTargetProperty.Name.IndexOf("TabCaption(" + Index.ToString() + ")", 0) > -1)
+                        if (targetProperty.Name.IndexOf("TabCaption(" + Index.ToString() + ")", 0) > -1)
                         {
                             // new tab
-                            oTabPage = new ControlType
+                            tabPage = new ControlType
                             {
                                 Type = "TabPage",
                                 Name = "tabPage" + Index.ToString(),
@@ -116,7 +116,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 Value = "new System.Drawing.Point(4, 22)",
                                 Valid = true
                             };
-                            oTabPage.PropertyList.Add(TargetProperty);
+                            tabPage.PropertyList.Add(TargetProperty);
 
                             TargetProperty = new ControlProperty
                             {
@@ -124,15 +124,15 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 Value = "new System.Drawing.Size(477, 374)",
                                 Valid = true
                             };
-                            oTabPage.PropertyList.Add(TargetProperty);
+                            tabPage.PropertyList.Add(TargetProperty);
 
                             TargetProperty = new ControlProperty
                             {
                                 Name = "Text",
-                                Value = oTargetProperty.Value,
+                                Value = targetProperty.Value,
                                 Valid = true
                             };
-                            oTabPage.PropertyList.Add(TargetProperty);
+                            tabPage.PropertyList.Add(TargetProperty);
 
                             TargetProperty = new ControlProperty
                             {
@@ -140,24 +140,24 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 Value = Index.ToString(),
                                 Valid = true
                             };
-                            oTabPage.PropertyList.Add(TargetProperty);
+                            tabPage.PropertyList.Add(TargetProperty);
 
-                            TempControlList.Add(oTabPage);
+                            TempControlList.Add(tabPage);
                             Index++;
                         }
 
                         // Control = change owner of control to current tab
                         //      this.SSTab1.(Tab(0).Control(0) = "ImageControl";
-                        if (oTargetProperty.Name.IndexOf(".Control(", 0) > -1)
-                            if (oTargetProperty.Name.IndexOf("Enable", 0) == -1)
+                        if (targetProperty.Name.IndexOf(".Control(", 0) > -1)
+                            if (targetProperty.Name.IndexOf("Enable", 0) == -1)
                             {
-                                String TabName = oTargetProperty.Value.Substring(1, oTargetProperty.Value.Length - 2);
+                                String TabName = targetProperty.Value.Substring(1, targetProperty.Value.Length - 2);
                                 TabName = GetControlIndexName(TabName);
                                 // search for "oTargetProperty.Value" control
                                 // and replace owner of this control to current tab
                                 foreach (ControlType oNewOwner in targetModule.ControlList)
                                     if (oNewOwner.Name == TabName && !oNewOwner.InvisibleAtRuntime)
-                                        oNewOwner.Owner = oTabPage.Name;
+                                        oNewOwner.Owner = tabPage.Name;
                             }
                     }
                 }
@@ -255,7 +255,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             foreach (ControlProperty SourceProperty in sourcePropertyList)
             {
                 TargetProperty = new ControlProperty();
-                if (ParseProperties(module.Type, SourceProperty, TargetProperty, sourcePropertyList))
+                if (ParseProperties(module.Type.ToString(), SourceProperty, TargetProperty, sourcePropertyList))
                 {
                     if (TargetProperty.Name == "BackgroundImage" || TargetProperty.Name == "Icon")
                         module.ImagesUsed = true;
@@ -611,7 +611,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     break;
 
                 case "BorderStyle":
-                    if (type == "form")
+                    if (type == "Form")
                     {
                         targetProperty.Name = "FormBorderStyle";
                         // 0 - none
@@ -839,7 +839,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     //          System.Drawing.Bitmap pic = null;
                     //          GetFRXImage(@"C:\temp\test\form1.frx", 0x13960, pic );
 
-                    if (type == "form")
+                    if (type == "Form")
                     {
                         //.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
                         targetProperty.Name = "Icon";

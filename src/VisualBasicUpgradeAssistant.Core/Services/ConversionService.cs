@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using VisualBasicUpgradeAssistant.Core.Extensions;
 using VisualBasicUpgradeAssistant.Core.Model;
 
 namespace VisualBasicUpgradeAssistant.Core.Services
@@ -21,19 +22,13 @@ namespace VisualBasicUpgradeAssistant.Core.Services
         {
             DirectoryInfo sourceDir = project.Directory;
 
-            String winformsPath =
-                Path.Combine(dest.FullName, basename, $"{basename}.Desktop", "UserInterface")
-                + Path.DirectorySeparatorChar;
-            String modulesPath =
-                Path.Combine(dest.FullName, basename, $"{basename}.Core", "Helpers")
-                + Path.DirectorySeparatorChar;
-            String classPath =
-                Path.Combine(dest.FullName, basename, $"{basename}.Core", "Services")
-                + Path.DirectorySeparatorChar;
+            DirectoryInfo winformsPath = dest.PathCombineDirectory(basename, $"{basename}.Desktop", "UserInterface");
+            DirectoryInfo modulesPath = dest.PathCombineDirectory(basename, $"{basename}.Core", "Helpers");
+            DirectoryInfo classPath = dest.PathCombineDirectory(basename, $"{basename}.Core", "Services");
 
-            Directory.CreateDirectory(winformsPath);
-            Directory.CreateDirectory(modulesPath);
-            Directory.CreateDirectory(classPath);
+            winformsPath.Create();
+            modulesPath.Create();
+            classPath.Create();
 
             ConvertCode convertCode = new ConvertCode();
             using (TextReader reader = project.OpenText())
@@ -49,14 +44,14 @@ namespace VisualBasicUpgradeAssistant.Core.Services
                     {
                         case "Class": // Last part Only
                             String classFile = kvm.Last().Split(';').Last().Trim();
-                            String classFilePath = Path.Combine(sourceDir.FullName, classFile);
+                            FileInfo classFilePath = sourceDir.PathCombineFile(classFile);
                             Debug.WriteLine($"class:{classFile}");
                             convertCode.ParseFile(classFilePath, classPath);
                             break;
 
                         case "Module": // Last part only
                             String moduleFile = kvm.Last().Split(';').Last().Trim();
-                            String moduleFilePath = Path.Combine(sourceDir.FullName, moduleFile);
+                            FileInfo moduleFilePath = sourceDir.PathCombineFile(moduleFile);
                             Debug.WriteLine($"module:{moduleFile}");
                             convertCode.ParseFile(moduleFilePath, modulesPath);
                             break;
@@ -64,7 +59,7 @@ namespace VisualBasicUpgradeAssistant.Core.Services
                         case "Form":
                             // Form files go to desktop
                             String formFile = kvm[1];
-                            String formFilePath = Path.Combine(sourceDir.FullName, formFile);
+                            FileInfo formFilePath = sourceDir.PathCombineFile(formFile);
                             Debug.WriteLine($"Form:{formFile}");
                             convertCode.ParseFile(formFilePath, winformsPath);
                             break;
@@ -95,7 +90,7 @@ namespace VisualBasicUpgradeAssistant.Core.Services
 
             // Add library
             startinfo.WorkingDirectory = outputDir.FullName;
-            startinfo.Arguments = $"new classlib -o {basename}.Core";
+            startinfo.Arguments = $"new classlib --langVersion 8.0 -o {basename}.Core";
             Process.Start(startinfo).WaitForExit();
 
             // Add Test
@@ -107,7 +102,7 @@ namespace VisualBasicUpgradeAssistant.Core.Services
             Process.Start(startinfo).WaitForExit();
 
             // Add Winforms
-            startinfo.Arguments = $"new winforms -o {basename}.Desktop";
+            startinfo.Arguments = $"new winforms --langVersion 8.0 -o {basename}.Desktop";
             Process.Start(startinfo).WaitForExit();
 
             // Add Test
