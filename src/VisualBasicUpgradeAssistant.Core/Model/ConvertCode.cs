@@ -15,7 +15,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
     /// </summary>
     public class ConvertCode
     {
-        private FileType _fileType;
         private Module _sourceModule;
         private Module _targetModule;
         private readonly ArrayList _ownerStock;
@@ -47,19 +46,10 @@ namespace VisualBasicUpgradeAssistant.Core.Model
         /// <returns></returns>
         public Boolean ParseFile(FileInfo inputFile, DirectoryInfo baseFolder, DirectoryInfo outDir)
         {
+            FileType _fileType;
             String temp;
             String version = String.Empty;
             Int32 position;
-
-            // try recognize source code type depend by file extension
-            String extension = inputFile.Extension.ToLowerInvariant();
-            _fileType = extension switch
-            {
-                ".frm" => FileType.Form,
-                ".bas" => FileType.Module,
-                ".cls" => FileType.Class,
-                _ => FileType.Unknown,
-            };
 
             // open file
             using FileStream inputStream = inputFile.OpenRead();
@@ -84,12 +74,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     position++;
                     version = GetWord(line, ref position);
 
-                    //Debug.WriteLine (Line + " " + Version);
-
-                    if (line.IndexOf(CLASS_FIRST_LINE, 0) > -1)
-                        _fileType = FileType.Class;
-                    else
-                        _fileType = FileType.Form;
+                    _fileType = line.IndexOf(CLASS_FIRST_LINE, 0) > -1 ? FileType.Class : FileType.Form;
                     break;
 
                 default:
@@ -139,22 +124,22 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             return true;
         }
 
-        private Boolean ParseForm(StreamReader reader)
+        private void ParseForm(StreamReader reader)
         {
             Boolean process = false;
             Boolean finish = false;
             Boolean end = true;
             String line;
             String name;
-            String owner = null;
+            String? owner = null;
             String word;
             Int32 index;
             Int32 comment;
             String type;
             Int32 position = 0;
             Int32 level = 0;
-            ControlType control = null;
-            ControlProperty nestedProperty = null;
+            ControlType? control = null;
+            ControlProperty? nestedProperty = null;
             Boolean bNestedProperty = false;
 
             // parse only visual part of form
@@ -181,7 +166,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         if (!end)
                         {
                             // add container control to colection
-                            if (!(control == null))
+                            if (control != null)
                             {
                                 control.Container = true;
                                 _sourceModule.ControlList.Add(control);
@@ -220,13 +205,19 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     case "End":
                         // double end - we leaving some container
                         if (end)
+                        {
                             // remove last item from stock
                             _ownerStock.Remove((String)_ownerStock[_ownerStock.Count - 1]);
+                        }
                         else
+                        {
                             // level 1 is form and all higher levels are controls
                             if (level > 1)
-                            // add control to colection
-                            _sourceModule.ControlList.Add(control);
+                            {
+                                // add control to colection
+                                _sourceModule.ControlList.Add(control!);
+                            }
+                        }
                         // form or control end detected
                         end = true;
                         // back to previous level
@@ -246,18 +237,21 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         position++;
                         name = GetWord(line, ref position);
                         nestedProperty.Name = name;
-                        //            Debug.WriteLine(sName);
                         break;
 
                     case "EndProperty":
                         bNestedProperty = false;
                         // add property to control or form
                         if (level == 1)
+                        {
                             // add property to form
-                            _sourceModule.FormPropertyList.Add(nestedProperty);
+                            _sourceModule.FormPropertyList.Add(nestedProperty!);
+                        }
                         else
+                        {
                             // to controls
-                            control.PropertyList.Add(nestedProperty);
+                            control?.PropertyList.Add(nestedProperty!);
+                        }
                         break;
 
                     default:
@@ -278,15 +272,21 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                                 property.Value = line.Substring(index + 1, line.Length - index - 1).Trim();
 
                             if (bNestedProperty)
-                                nestedProperty.PropertyList.Add(property);
+                            {
+                                nestedProperty?.PropertyList.Add(property);
+                            }
                             else
                                 // depend by level insert property to form or control
                                 if (level > 1)
+                            {
                                 // add property to control
-                                control.PropertyList.Add(property);
+                                control?.PropertyList.Add(property);
+                            }
                             else
+                            {
                                 // add property to form
                                 _sourceModule.FormPropertyList.Add(property);
+                            }
                         }
                         break;
                 }
@@ -295,10 +295,9 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     // visual part of form is finish
                     finish = true;
             }
-            return true;
         }
 
-        private Boolean ParseModule(StreamReader reader)
+        private void ParseModule(StreamReader reader)
         {
             String line;
             Int32 position;
@@ -310,17 +309,15 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             reader.DiscardBufferedData();
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
             // search for module name
-            while (reader.Peek() > -1)
+            if (reader.Peek() > -1)
             {
                 line = reader.ReadLine();
                 position = line.IndexOf('"');
                 _sourceModule.Name = line.Substring(position + 1, line.Length - position - 2);
-                return true;
             }
-            return false;
         }
 
-        private Boolean ParseClass(StreamReader reader)
+        private void ParseClass(StreamReader reader)
         {
             Int32 position = 0;
             String line;
@@ -361,12 +358,11 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             break;
 
                         case "VB_Exposed":
-                            return true;
+                            return;
                             //break;
                     }
                 }
             }
-            return false;
         }
 
         private Boolean ParseProcedures(StreamReader reader)
@@ -385,16 +381,15 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             Boolean bProcedure = false;
             Boolean bEnd = false;
 
-            Variable variable = null;
-            Property property = null;
-            Procedure procedure = null;
-            EnumType enumType = null;
-            EnumItem enumItem = null;
+            Variable? variable = null;
+            Property? property = null;
+            Procedure? procedure = null;
+            EnumType? enumType = null;
+            EnumItem? enumItem = null;
 
             while (reader.Peek() > -1)
             {
                 line = reader.ReadLine();
-                //Line = Line.Trim();
 
                 position = 0;
 
@@ -403,8 +398,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     while (line.Substring(line.Length - 1, 1) == "_")
                         line = line + reader.ReadLine();
                 // : is command delimiter
-
-                //  Debug.WriteLine(Line);
 
                 // get first word in line
                 tempString = GetWord(line, ref position);
@@ -519,13 +512,13 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             comments = String.Empty;
                             ParseEnumItem(enumItem, line);
                             // add item
-                            enumType.ItemList.Add(enumItem);
+                            enumType?.ItemList.Add(enumItem);
                         }
                         if (bProperty)
                             // add line of property
-                            property.LineList.Add(line);
+                            property?.LineList.Add(line);
                         if (bProcedure)
-                            procedure.LineList.Add(line);
+                            procedure?.LineList.Add(line);
                         break;
 
                         // events

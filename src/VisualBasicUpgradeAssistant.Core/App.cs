@@ -13,7 +13,6 @@ namespace VisualBasicUpgradeAssistant.Core
                 .AsInterfaces()
                 .RegisterAsLazySingleton();
 
-            //Mvx.IoCProvider.RegisterType<OmegaViewModel>();
             CreatableTypes()
                 .EndingWith("ViewModel")
                 .AsTypes()
