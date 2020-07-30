@@ -935,6 +935,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             {
                 case FileType.Form:
                     design.AppendLine(Indent2 + "public partial class " + _sourceModule.Name + " : System.Windows.Forms.Form");
+                    result.AppendLine(Indent2 + "public partial class " + _sourceModule.Name + " : System.Windows.Forms.Form");
                     break;
 
                 case FileType.Module:
