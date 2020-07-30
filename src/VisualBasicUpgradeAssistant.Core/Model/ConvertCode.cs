@@ -10,14 +10,6 @@ using VisualBasicUpgradeAssistant.Core.Extensions;
 
 namespace VisualBasicUpgradeAssistant.Core.Model
 {
-    public enum FileType
-    {
-        Unknown = 0,
-        Form = 1,
-        Module = 2,
-        Class = 3
-    };
-
     /// <summary>
     /// Summary description for Convert.
     /// </summary>
@@ -46,14 +38,21 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         public String OutSourceCode { get; private set; }
 
-        public Boolean ParseFile(FileInfo filepath, DirectoryInfo outDir)
+        /// <summary>
+        /// Parse the file into CS code
+        /// </summary>
+        /// <param name="inputFile"></param>
+        /// <param name="baseFolder"></param>
+        /// <param name="outDir"></param>
+        /// <returns></returns>
+        public Boolean ParseFile(FileInfo inputFile, DirectoryInfo baseFolder, DirectoryInfo outDir)
         {
             String temp;
             String version = String.Empty;
             Int32 position;
 
             // try recognize source code type depend by file extension
-            String extension = filepath.Extension.ToLowerInvariant();
+            String extension = inputFile.Extension.ToLowerInvariant();
             _fileType = extension switch
             {
                 ".frm" => FileType.Form,
@@ -63,7 +62,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             };
 
             // open file
-            using FileStream inputStream = filepath.OpenRead();
+            using FileStream inputStream = inputFile.OpenRead();
             StreamReader reader = new StreamReader(inputStream);
 
             String line = reader.ReadLine();
@@ -107,7 +106,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             _sourceModule = new Module
             {
                 Version = version,
-                FileName = filepath.FullName
+                FileName = inputFile.FullName
             };
 
             // now parse specifics of each type
@@ -135,18 +134,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             reader.Close();
 
             // generate output file
-            OutSourceCode = GetOutSourceCode(outDir);
-
-            // save result
-            FileInfo outFileName = outDir.PathCombineFile(_targetModule.FileName);
-            using Stream outputSteam = outFileName.Create();
-            StreamWriter Writer = new StreamWriter(outputSteam);
-            Writer.Write(OutSourceCode);
-            Writer.Close();
-            // generate resx file if source form contain any images
-
-            if (_targetModule.ImagesUsed)
-                WriteResX(_targetModule.ImageList, outDir, _targetModule.Name);
+            OutSourceCode = GenerateOutput(baseFolder, outDir);
 
             return true;
         }
@@ -886,57 +874,82 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         // generate result file
         // OutPath for pictures
-        private String GetOutSourceCode(DirectoryInfo outPath)
+        private String GenerateOutput(DirectoryInfo basePath, DirectoryInfo outPath)
         {
+            // Setup output files.
             StringBuilder result = new StringBuilder();
-
-            String temp = String.Empty;
+            StringBuilder design = new StringBuilder();
 
             // convert source to target
             _targetModule = new Module();
             _tools.ParseModule(_sourceModule, _targetModule);
 
+            // Try to figure out namespace
+            String baseFullName = outPath.Parent.Parent.FullName;
+            String outputFullName = outPath.FullName;
+            String projectName = outputFullName.Substring(baseFullName.Length);
+            projectName = projectName.Replace(Path.DirectorySeparatorChar, '.');
+            projectName = projectName.Replace(Path.AltDirectorySeparatorChar, '.');
+            if (projectName.StartsWith("."))
+                projectName = projectName.Substring(1);
+
             // ********************************************************
             // common class
             // ********************************************************
-            result.Append("using System;\r\n");
+            result.AppendLine("using Microsoft.VisualBasic;");
+            result.AppendLine("using System;");
+
+            design.AppendLine("using Microsoft.VisualBasic;");
+            design.AppendLine("using System;");
 
             // ********************************************************
             // only form class
             // ********************************************************
             if (_targetModule.Type == FileType.Form)
             {
-                result.Append("using System.Drawing;\r\n");
-                result.Append("using System.Collections;\r\n");
-                result.Append("using System.ComponentModel;\r\n");
-                result.Append("using System.Windows.Forms;\r\n");
+                design.AppendLine("using System.Drawing;");
+                design.AppendLine("using System.Collections;");
+                design.AppendLine("using System.ComponentModel;");
+                design.AppendLine("using System.Windows.Forms;");
             }
 
-            result.Append("\r\n");
-            result.Append("namespace ProjectName\r\n");
+            // standard header
+            result.AppendLine();
+            result.AppendLine($"namespace {projectName}");
             // start namepsace region
-            result.Append("{\r\n");
-            result.Append(Indent2 + "/// <summary>\r\n");
-            result.Append(Indent2 + "/// Summary description for " + _sourceModule.Name + ".\r\n");
-            result.Append(Indent2 + "/// </summary>\r\n");
+            result.AppendLine("{");
+            result.AppendLine(Indent2 + "/// <summary>");
+            result.AppendLine(Indent2 + "/// Summary description for " + _sourceModule.Name + ".");
+            result.AppendLine(Indent2 + "/// </summary>");
+
+            // and for desing
+            design.AppendLine();
+            design.AppendLine($"namespace {projectName}");
+            // start namepsace region
+            design.AppendLine("{");
+            design.AppendLine(Indent2 + "/// <summary>");
+            design.AppendLine(Indent2 + "/// Summary description for " + _sourceModule.Name + ".");
+            design.AppendLine(Indent2 + "/// </summary>");
 
             switch (_targetModule.Type)
             {
                 case FileType.Form:
-                    result.Append(Indent2 + "public class " + _sourceModule.Name + " : System.Windows.Forms.Form\r\n");
+                    design.AppendLine(Indent2 + "public partial class " + _sourceModule.Name + " : System.Windows.Forms.Form");
+                    result.AppendLine(Indent2 + "public partial class " + _sourceModule.Name + " : System.Windows.Forms.Form");
                     break;
 
                 case FileType.Module:
-                    result.Append(Indent2 + "sealed class " + _sourceModule.Name + "\r\n");
+                    result.AppendLine(Indent2 + "public sealed class " + _sourceModule.Name);
                     // all procedures must be static
                     break;
 
                 case FileType.Class:
-                    result.Append(Indent2 + "public class " + _sourceModule.Name + "\r\n");
+                    result.AppendLine(Indent2 + "public class " + _sourceModule.Name);
                     break;
             }
             // start class region
-            result.Append(Indent2 + "{\r\n");
+            result.AppendLine(Indent2 + "{");
+            design.AppendLine(Indent2 + "{");
 
             // ********************************************************
             // only form class
@@ -948,63 +961,63 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 foreach (ControlType oControl in _targetModule.ControlList)
                 {
                     if (!oControl.Valid)
-                        result.Append("//");
-                    result.Append(Indent2 + " private System.Windows.Forms." + oControl.Type + " " + oControl.Name + ";\r\n");
+                        design.Append("//");
+                    design.AppendLine(Indent2 + " private System.Windows.Forms." + oControl.Type + " " + oControl.Name + ";");
                 }
 
-                result.Append(Indent4 + "/// <summary>\r\n");
-                result.Append(Indent4 + "/// Required designer variable.\r\n");
-                result.Append(Indent4 + "/// </summary>\r\n");
-                result.Append(Indent4 + "private System.ComponentModel.Container components = null;\r\n");
-                result.Append("\r\n");
-                result.Append(Indent4 + "public " + _sourceModule.Name + "()\r\n");
-                result.Append(Indent4 + "{\r\n");
-                result.Append(Indent6 + "// Required for Windows Form Designer support\r\n");
-                result.Append(Indent6 + "InitializeComponent();\r\n");
-                result.Append("\r\n");
-                result.Append(Indent6 + "// TODO: Add any constructor code after InitializeComponent call\r\n");
-                result.Append(Indent4 + "}\r\n");
+                design.Append(Indent4 + "/// <summary>\r\n");
+                design.Append(Indent4 + "/// Required designer variable.\r\n");
+                design.Append(Indent4 + "/// </summary>\r\n");
+                design.Append(Indent4 + "private System.ComponentModel.Container components = null;\r\n");
+                design.Append("\r\n");
+                design.Append(Indent4 + "public " + _sourceModule.Name + "()\r\n");
+                design.Append(Indent4 + "{\r\n");
+                design.Append(Indent6 + "// Required for Windows Form Designer support\r\n");
+                design.Append(Indent6 + "InitializeComponent();\r\n");
+                design.Append("\r\n");
+                design.Append(Indent6 + "// TODO: Add any constructor code after InitializeComponent call\r\n");
+                design.Append(Indent4 + "}\r\n");
 
-                result.Append(Indent4 + "/// <summary>\r\n");
-                result.Append(Indent4 + "/// Clean up any resources being used.\r\n");
-                result.Append(Indent4 + "/// </summary>\r\n");
-                result.Append(Indent4 + "protected override void Dispose( bool disposing )\r\n");
-                result.Append(Indent4 + "{\r\n");
-                result.Append(Indent6 + "if( disposing )\r\n");
-                result.Append(Indent6 + "{\r\n");
-                result.Append(Indent6 + "  if (components != null)\r\n");
-                result.Append(Indent6 + "  {\r\n");
-                result.Append(Indent6 + "    components.Dispose();\r\n");
-                result.Append(Indent6 + "  }\r\n");
-                result.Append(Indent6 + "}\r\n");
-                result.Append(Indent6 + "base.Dispose( disposing );\r\n");
-                result.Append(Indent4 + "}\r\n");
+                design.Append(Indent4 + "/// <summary>\r\n");
+                design.Append(Indent4 + "/// Clean up any resources being used.\r\n");
+                design.Append(Indent4 + "/// </summary>\r\n");
+                design.Append(Indent4 + "protected override void Dispose( bool disposing )\r\n");
+                design.Append(Indent4 + "{\r\n");
+                design.Append(Indent6 + "if( disposing )\r\n");
+                design.Append(Indent6 + "{\r\n");
+                design.Append(Indent6 + "  if (components != null)\r\n");
+                design.Append(Indent6 + "  {\r\n");
+                design.Append(Indent6 + "    components.Dispose();\r\n");
+                design.Append(Indent6 + "  }\r\n");
+                design.Append(Indent6 + "}\r\n");
+                design.Append(Indent6 + "base.Dispose( disposing );\r\n");
+                design.Append(Indent4 + "}\r\n");
 
-                result.Append(Indent4 + "#region Windows Form Designer generated code\r\n");
-                result.Append(Indent4 + "/// <summary>\r\n");
-                result.Append(Indent4 + "/// Required method for Designer support - do not modify\r\n");
-                result.Append(Indent4 + "/// the contents of this method with the code editor.\r\n");
-                result.Append(Indent4 + "/// </summary>\r\n");
-                result.Append(Indent4 + "private void InitializeComponent()\r\n");
-                result.Append(Indent4 + "{\r\n");
+                design.Append(Indent4 + "#region Windows Form Designer generated code\r\n");
+                design.Append(Indent4 + "/// <summary>\r\n");
+                design.Append(Indent4 + "/// Required method for Designer support - do not modify\r\n");
+                design.Append(Indent4 + "/// the contents of this method with the code editor.\r\n");
+                design.Append(Indent4 + "/// </summary>\r\n");
+                design.Append(Indent4 + "private void InitializeComponent()\r\n");
+                design.Append(Indent4 + "{\r\n");
 
                 // if form contain images
                 if (_targetModule.ImagesUsed)
                     // System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(Form1));
-                    result.Append(Indent6 + "System.Resources.ResourceManager resources = " +
+                    design.Append(Indent6 + "System.Resources.ResourceManager resources = " +
                       "new System.Resources.ResourceManager(typeof(" + _targetModule.Name + "));\r\n");
 
                 foreach (ControlType oControl in _targetModule.ControlList)
                 {
                     if (!oControl.Valid)
-                        result.Append("//");
-                    result.Append(Indent6 + "this." + oControl.Name
+                        design.Append("//");
+                    design.Append(Indent6 + "this." + oControl.Name
                       + " = new System.Windows.Forms." + oControl.Type
                       + "();\r\n");
                 }
 
                 // SuspendLayout part
-                result.Append(Indent6 + "this.SuspendLayout();\r\n");
+                design.Append(Indent6 + "this.SuspendLayout();\r\n");
                 // this.Frame1.ResumeLayout(false);
                 // resume layout for each container
                 foreach (ControlType control in _targetModule.ControlList)
@@ -1013,33 +1026,33 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     if (control.Container && !(control.Type == "MenuItem") && !(control.Type == "MainMenu"))
                     {
                         if (!control.Valid)
-                            result.Append("//");
-                        result.Append(Indent6 + "this." + control.Name + ".SuspendLayout();\r\n");
+                            design.Append("//");
+                        design.Append(Indent6 + "this." + control.Name + ".SuspendLayout();\r\n");
                     }
 
                 // each controls and his property
                 foreach (ControlType control in _targetModule.ControlList)
                 {
-                    result.Append(Indent6 + "//\r\n");
-                    result.Append(Indent6 + "// " + control.Name + "\r\n");
-                    result.Append(Indent6 + "//\r\n");
+                    design.Append(Indent6 + "//\r\n");
+                    design.Append(Indent6 + "// " + control.Name + "\r\n");
+                    design.Append(Indent6 + "//\r\n");
 
                     // unsupported control
                     if (!control.Valid)
-                        result.Append("/*");
+                        design.Append("/*");
                     // ImageList, Timer, Menu has't name property
                     if (control.Type != "ImageList" && control.Type != "Timer"
                       && control.Type != "MenuItem" && control.Type != "MainMenu")
                         // control name
-                        result.Append(Indent6 + "this." + control.Name + ".Name = "
+                        design.Append(Indent6 + "this." + control.Name + ".Name = "
                           + (Char)34 + control.Name + (Char)34 + ";\r\n");
 
                     // write properties
                     foreach (ControlProperty oProperty in control.PropertyList)
-                        GetPropertyRow(result, control.Type, control.Name, oProperty, outPath);
+                        GetPropertyRow(design, control.Type, control.Name, oProperty, outPath);
 
                     // if control is container for other controls
-                    temp = String.Empty;
+                    String temp = String.Empty;
                     foreach (ControlType control1 in _targetModule.ControlList)
                         // all controls ownered by current control
                         if (control1.Owner == control.Name && !control1.InvisibleAtRuntime)
@@ -1049,60 +1062,60 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         // exception for menu controls
                         if (control.Type == "MainMenu" || control.Type == "MenuItem")
                             // this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[]
-                            result.Append(Indent6 + "this." + control.Name
+                            design.Append(Indent6 + "this." + control.Name
                               + ".MenuItems.AddRange(new System.Windows.Forms.MenuItem[]\r\n");
                         else
                             // this. + oControl.Name + .Controls.AddRange(new System.Windows.Forms.Control[]
-                            result.Append(Indent6 + "this." + control.Name
+                            design.Append(Indent6 + "this." + control.Name
                               + ".Controls.AddRange(new System.Windows.Forms.Control[]\r\n");
 
-                        result.Append(Indent6 + "{\r\n");
-                        result.Append(temp);
+                        design.Append(Indent6 + "{\r\n");
+                        design.Append(temp);
                         // remove last comma, keep CRLF
-                        result.Remove(result.Length - 3, 1);
+                        design.Remove(design.Length - 3, 1);
                         // close addrange part
-                        result.Append(Indent6 + "});\r\n");
+                        design.Append(Indent6 + "});\r\n");
                     }
                     // unsupported control
                     if (!control.Valid)
-                        result.Append("*/");
+                        design.Append("*/");
                 }
 
-                result.Append(Indent6 + "//\r\n");
-                result.Append(Indent6 + "// " + _sourceModule.Name + "\r\n");
-                result.Append(Indent6 + "//\r\n");
-                result.Append(Indent6 + "this.Controls.AddRange(new System.Windows.Forms.Control[]\r\n");
-                result.Append(Indent6 + "{\r\n");
+                design.Append(Indent6 + "//\r\n");
+                design.Append(Indent6 + "// " + _sourceModule.Name + "\r\n");
+                design.Append(Indent6 + "//\r\n");
+                design.Append(Indent6 + "this.Controls.AddRange(new System.Windows.Forms.Control[]\r\n");
+                design.Append(Indent6 + "{\r\n");
 
                 // add control range to form
                 foreach (ControlType oControl in _targetModule.ControlList)
                 {
                     if (!oControl.Valid)
-                        result.Append("//");
+                        design.Append("//");
                     // all controls ownered by main form
                     if (oControl.Owner == _sourceModule.Name && !oControl.InvisibleAtRuntime)
-                        result.Append(Indent6 + "      this." + oControl.Name + ",\r\n");
+                        design.Append(Indent6 + "      this." + oControl.Name + ",\r\n");
                 }
 
                 // remove last comma, keep CRLF
-                result.Remove(result.Length - 3, 1);
+                //design.Remove(result.Length - 3, 1);
                 // close addrange part
-                result.Append(Indent6 + "});\r\n");
+                design.Append(Indent6 + "});\r\n");
 
                 // form name
-                result.Append(Indent6 + "this.Name = " + (Char)34 + _targetModule.Name + (Char)34 + ";\r\n");
+                design.Append(Indent6 + "this.Name = " + (Char)34 + _targetModule.Name + (Char)34 + ";\r\n");
                 // exception for menu
                 // this.Menu = this.mainMenu1;
                 if (_targetModule.MenuUsed)
                     foreach (ControlType control in _targetModule.ControlList)
                         if (control.Type == "MainMenu")
-                            result.Append(Indent6 + "      this.Menu = " + control.Name + ";\r\n");
+                            design.Append(Indent6 + "      this.Menu = " + control.Name + ";\r\n");
                 // form properties
                 foreach (ControlProperty property in _targetModule.FormPropertyList)
                 {
                     if (!property.Valid)
-                        result.Append("//");
-                    GetPropertyRow(result, _targetModule.Type.ToString(), "", property, outPath);
+                        design.Append("//");
+                    GetPropertyRow(design, _targetModule.Type.ToString(), "", property, outPath);
                 }
 
                 // this.CancelButton = this.cmdExit;
@@ -1114,14 +1127,14 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     if (control.Container && !(control.Type == "MenuItem") && !(control.Type == "MainMenu"))
                     {
                         if (!control.Valid)
-                            result.Append("//");
-                        result.Append(Indent6 + "this." + control.Name + ".ResumeLayout(false);\r\n");
+                            design.Append("//");
+                        design.Append(Indent6 + "this." + control.Name + ".ResumeLayout(false);\r\n");
                     }
                 // form
-                result.Append(Indent6 + "this.ResumeLayout(false);\r\n");
+                design.Append(Indent6 + "this.ResumeLayout(false);\r\n");
 
-                result.Append(Indent4 + "}\r\n");
-                result.Append(Indent4 + "#endregion\r\n");
+                design.Append(Indent4 + "}\r\n");
+                design.Append(Indent4 + "#endregion\r\n");
             } // if (mTargetModule.Type = "form")
 
             // ********************************************************
@@ -1195,7 +1208,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                         // lines
                         foreach (String Line in property.LineList)
                         {
-                            temp = Line.Trim();
+                            String temp = Line.Trim();
                             if (temp.Length > 0)
                                 result.Append(Indent6 + temp + ";\r\n");
                             else
@@ -1244,7 +1257,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
                     foreach (String Line in oProcedure.LineList)
                     {
-                        temp = Line.Trim();
+                        String temp = Line.Trim();
                         if (temp.Length > 0)
                             result.Append(Indent6 + temp + ";\r\n");
                         else
@@ -1256,9 +1269,29 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             }
 
             // end class
-            result.Append(Indent2 + "}\r\n");
+            result.AppendLine(Indent2 + "}");
+            design.AppendLine(Indent2 + "}");
+
             // end namespace
-            result.Append("}\r\n");
+            result.AppendLine("}");
+            design.AppendLine("}");
+
+            // save result
+            FileInfo outFileName = outPath.PathCombineFile(_targetModule.FileName);
+            File.WriteAllText(outFileName.FullName, result.ToString());
+
+            // save design file
+            if (_targetModule.Type == FileType.Form)
+            {
+                String designFile = Path.GetFileNameWithoutExtension(_targetModule.FileName);
+                designFile = $"{designFile}.Designer.cs";
+                FileInfo designFilePath = outPath.PathCombineFile(designFile);
+                File.WriteAllText(designFilePath.FullName, design.ToString());
+            }
+
+            // generate resx file if source form contain any images
+            if (_targetModule.ImagesUsed)
+                WriteResX(_targetModule.ImageList, outPath, _targetModule.Name);
 
             // return result
             return result.ToString();
