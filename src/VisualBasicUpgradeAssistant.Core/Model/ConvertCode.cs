@@ -10,14 +10,6 @@ using VisualBasicUpgradeAssistant.Core.Extensions;
 
 namespace VisualBasicUpgradeAssistant.Core.Model
 {
-    public enum FileType
-    {
-        Unknown = 0,
-        Form = 1,
-        Module = 2,
-        Class = 3
-    };
-
     /// <summary>
     /// Summary description for Convert.
     /// </summary>
@@ -46,14 +38,21 @@ namespace VisualBasicUpgradeAssistant.Core.Model
 
         public String OutSourceCode { get; private set; }
 
-        public Boolean ParseFile(FileInfo filepath, DirectoryInfo outDir)
+        /// <summary>
+        /// Parse the file into CS code
+        /// </summary>
+        /// <param name="inputFile"></param>
+        /// <param name="baseFolder"></param>
+        /// <param name="outDir"></param>
+        /// <returns></returns>
+        public Boolean ParseFile(FileInfo inputFile, DirectoryInfo baseFolder, DirectoryInfo outDir)
         {
             String temp;
             String version = String.Empty;
             Int32 position;
 
             // try recognize source code type depend by file extension
-            String extension = filepath.Extension.ToLowerInvariant();
+            String extension = inputFile.Extension.ToLowerInvariant();
             _fileType = extension switch
             {
                 ".frm" => FileType.Form,
@@ -63,7 +62,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             };
 
             // open file
-            using FileStream inputStream = filepath.OpenRead();
+            using FileStream inputStream = inputFile.OpenRead();
             StreamReader reader = new StreamReader(inputStream);
 
             String line = reader.ReadLine();
@@ -107,7 +106,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
             _sourceModule = new Module
             {
                 Version = version,
-                FileName = filepath.FullName
+                FileName = inputFile.FullName
             };
 
             // now parse specifics of each type

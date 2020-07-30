@@ -46,14 +46,14 @@ namespace VisualBasicUpgradeAssistant.Core.Services
                             String classFile = kvm.Last().Split(';').Last().Trim();
                             FileInfo classFilePath = sourceDir.PathCombineFile(classFile);
                             Debug.WriteLine($"class:{classFile}");
-                            convertCode.ParseFile(classFilePath, classPath);
+                            convertCode.ParseFile(classFilePath, dest, classPath);
                             break;
 
                         case "Module": // Last part only
                             String moduleFile = kvm.Last().Split(';').Last().Trim();
                             FileInfo moduleFilePath = sourceDir.PathCombineFile(moduleFile);
                             Debug.WriteLine($"module:{moduleFile}");
-                            convertCode.ParseFile(moduleFilePath, modulesPath);
+                            convertCode.ParseFile(moduleFilePath, dest, modulesPath);
                             break;
 
                         case "Form":
@@ -61,7 +61,7 @@ namespace VisualBasicUpgradeAssistant.Core.Services
                             String formFile = kvm[1];
                             FileInfo formFilePath = sourceDir.PathCombineFile(formFile);
                             Debug.WriteLine($"Form:{formFile}");
-                            convertCode.ParseFile(formFilePath, winformsPath);
+                            convertCode.ParseFile(formFilePath, dest, winformsPath);
                             break;
                     }
                 }
