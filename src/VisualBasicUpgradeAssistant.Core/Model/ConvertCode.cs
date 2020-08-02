@@ -805,7 +805,7 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     break;
 
                 default:
-                    procedure.Scope = "private";
+                    procedure.Scope = "internal";
                     status = true;
                     break;
             }
@@ -1461,7 +1461,9 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                             break;
 
                         case "Icon":
-                            result.Append(Indent6 + "this."
+                            // TODO: FIX ICON PARSING
+                            // its either here or when writing image.
+                            result.Append(Indent6 + "//this."
                               + property.Name + " = ((System.Drawing.Icon)(resources.GetObject("
                               + (Char)34 + "$this.Icon" + (Char)34 + ")));\r\n");
                             break;
