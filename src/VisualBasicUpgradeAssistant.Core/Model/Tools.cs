@@ -677,7 +677,20 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                 case "Caption":
                 case "Text":
                     targetProperty.Name = "Text";
-                    targetProperty.Value = sourceProperty.Value;
+
+                    String property = sourceProperty.Value;
+                    var index = property.LastIndexOf("\"");
+                    if (index > 0)
+                    {
+                        property = property.Substring(0, index + 1);
+                    }
+
+                    targetProperty.Value = property;
+                    // TODO: try to adjust for extra characters.
+                    //if (targetProperty.Value.Contains("\"") && targetProperty.Value.Contains(":"))
+                    //{
+                    //    targetProperty.Value = targetProperty.Value.Split(':').First();
+                    //}
                     break;
 
                 // this.cmdExit.Size = new System.Drawing.Size(80, 40);
