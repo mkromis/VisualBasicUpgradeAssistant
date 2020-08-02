@@ -686,11 +686,6 @@ namespace VisualBasicUpgradeAssistant.Core.Model
                     }
 
                     targetProperty.Value = property;
-                    // TODO: try to adjust for extra characters.
-                    //if (targetProperty.Value.Contains("\"") && targetProperty.Value.Contains(":"))
-                    //{
-                    //    targetProperty.Value = targetProperty.Value.Split(':').First();
-                    //}
                     break;
 
                 // this.cmdExit.Size = new System.Drawing.Size(80, 40);
