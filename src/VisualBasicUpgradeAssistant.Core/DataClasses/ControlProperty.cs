@@ -16,6 +16,8 @@ namespace VisualBasicUpgradeAssistant.Core.DataClasses
 
         public ControlProperty()
         {
+            Name = String.Empty;
+            Value = String.Empty;
             PropertyList = new List<ControlProperty>();
             Valid = false;
         }
