@@ -112,6 +112,30 @@ namespace VisualBasicUpgradeAssistant.Core.Services
             // Combine into sln
             startinfo.Arguments = $"sln {basename}.sln add {basename}.Core {basename}.CoreTests {basename}.Desktop";
             Process.Start(startinfo).WaitForExit();
+
+#if DEBUG
+            DowngradeFramework(outputDir, @$"{basename}.Core\{basename}.Core.csproj");
+            DowngradeFramework(outputDir, @$"{basename}.CoreTests\{basename}.CoreTests.csproj");
+            DowngradeFramework(outputDir, @$"{basename}.Desktop\{basename}.Desktop.csproj");
+#endif
+
+            // Add references
+            startinfo.Arguments = @$"add {basename}.Core\{basename}.Core.csproj package Microsoft.VisualBasic";
+            Process.Start(startinfo).WaitForExit();
+
+            startinfo.Arguments = @$"add {basename}.CoreTests\{basename}.CoreTests.csproj package Microsoft.VisualBasic";
+            Process.Start(startinfo).WaitForExit();
+
+            startinfo.Arguments = @$"add {basename}.Desktop\{basename}.Desktop.csproj package Microsoft.VisualBasic";
+            Process.Start(startinfo).WaitForExit();
+        }
+
+        private static void DowngradeFramework(DirectoryInfo outputDir, String project)
+        {
+            String filepath = Path.Combine(outputDir.FullName, project);
+            String content = File.ReadAllText(filepath);
+            content = content.Replace("net5.0", "net472");
+            File.WriteAllText(filepath, content);
         }
     }
 }
